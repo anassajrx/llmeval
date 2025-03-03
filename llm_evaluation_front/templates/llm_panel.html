@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}LLM Panel | Système d'Évaluation LLM{% endblock %}
+{% block llm_active %}active{% endblock %}
+{% block page_title %}LLM Panel{% endblock %}
+
+{% block content %}
+<div class="llm-panel-container">
+    <div class="llm-info-card">
+        <h3>Informations sur le LLM</h3>
+        <div class="llm-info" id="llm-info">
+            <div class="loading">Chargement des informations...</div>
+        </div>
+    </div>
+    
+    <div class="llm-stats-card">
+        <h3>Statistiques de performance</h3>
+        <div class="llm-stats" id="llm-stats">
+            <div class="loading">Chargement des statistiques...</div>
+        </div>
+    </div>
+    
+    <div class="performance-chart-container">
+        <h3>Performance par critère</h3>
+        <div class="chart" id="criteria-performance-chart"></div>
+    </div>
+    
+    <div class="examples-container">
+        <h3>Exemples de QCM</h3>
+        <div class="examples-tabs">
+            <button class="tab-btn active" data-tab="success">Réussites</button>
+            <button class="tab-btn" data-tab="failure">Échecs</button>
+        </div>
+        <div class="examples-content">
+            <div class="tab-content active" id="success-examples">
+                <p class="empty-state">Aucun exemple disponible</p>
+            </div>
+            <div class="tab-content" id="failure-examples">
+                <p class="empty-state">Aucun exemple disponible</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/llm-panel.js"></script>
+{% endblock %}

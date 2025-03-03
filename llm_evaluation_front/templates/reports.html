@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Rapports | Système d'Évaluation LLM{% endblock %}
+{% block reports_active %}active{% endblock %}
+{% block page_title %}Rapports{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+    <div class="report-filters">
+        <div class="filter-group">
+            <label for="report-filter">Filtrer par:</label>
+            <select id="report-filter">
+                <option value="all">Tous les rapports</option>
+                <option value="recent">Récents (7 derniers jours)</option>
+                <option value="document">Par document</option>
+            </select>
+        </div>
+        <div class="filter-group" id="document-filter-container" style="display: none;">
+            <label for="document-filter">Document:</label>
+            <select id="document-filter"></select>
+        </div>
+    </div>
+    
+    <div class="reports-list">
+        <h3>Rapports disponibles</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID Rapport</th>
+                        <th>Date</th>
+                        <th>Évaluation</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reports-table-body">
+                    <tr>
+                        <td colspan="5" class="empty-state">Aucun rapport disponible</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="report-viewer" id="report-viewer">
+        <h3>Visualisation du rapport</h3>
+        <div class="report-actions">
+            <button id="export-report-btn" class="secondary-btn" disabled>Exporter</button>
+        </div>
+        <div class="report-content" id="report-content">
+            <div class="report-placeholder">Sélectionnez un rapport pour le visualiser</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="report-export-modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Exporter le rapport</h2>
+        <div class="export-options">
+            <button class="export-btn" data-format="html">
+                <span class="format-icon">HTML</span>
+                <span class="format-name">Page Web</span>
+            </button>
+            <button class="export-btn" data-format="pdf">
+                <span class="format-icon">PDF</span>
+                <span class="format-name">Document PDF</span>
+            </button>
+            <button class="export-btn" data-format="csv">
+                <span class="format-icon">CSV</span>
+                <span class="format-name">Données CSV</span>
+            </button>
+            <button class="export-btn" data-format="json">
+                <span class="format-icon">JSON</span>
+                <span class="format-name">Données JSON</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/reports.js"></script>
+{% endblock %}

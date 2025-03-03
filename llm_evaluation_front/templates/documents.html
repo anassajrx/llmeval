@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Documents | Système d'Évaluation LLM{% endblock %}
+{% block documents_active %}active{% endblock %}
+{% block page_title %}Gestion des Documents{% endblock %}
+
+{% block actions %}
+<button id="upload-btn" class="primary-btn">Importer un document</button>
+{% endblock %}
+
+{% block content %}
+<div class="documents-container">
+    <div class="upload-zone" id="upload-zone">
+        <div class="upload-inner">
+            <div class="upload-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#86bc24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <h3>Glissez des fichiers PDF ici</h3>
+            <p>ou</p>
+            <label for="file-input" class="file-input-label">Parcourir</label>
+            <input type="file" id="file-input" accept=".pdf" style="display: none;">
+        </div>
+    </div>
+    
+    <div class="documents-list">
+        <div class="list-header">
+            <h3>Documents disponibles</h3>
+            <div class="search-box">
+                <input type="text" id="search-docs" placeholder="Rechercher...">
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Date d'import</th>
+                        <th>Taille</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documents-table-body">
+                    <tr>
+                        <td colspan="5" class="empty-state">Aucun document disponible</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="document-modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Détails du document</h2>
+        <div id="document-details">
+            <div class="loading">Chargement...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/documents.js"></script>
+{% endblock %}

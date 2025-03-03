@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil | Système d'Évaluation LLM{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block page_title %}Tableau de Bord{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Documents</h3>
+            <div class="stat-value" id="documents-count">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Évaluations</h3>
+            <div class="stat-value" id="evaluations-count">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>QCM Générés</h3>
+            <div class="stat-value" id="qcm-count">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Taux de Succès</h3>
+            <div class="stat-value" id="success-rate">0%</div>
+        </div>
+    </div>
+    
+    <div class="charts-container">
+        <div class="chart-card">
+            <h3>Performance par Critère</h3>
+            <div class="chart" id="criteria-chart"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Activité Récente</h3>
+            <div class="activity-log" id="activity-log">
+                <p class="empty-state">Pas d'activité récente</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="recent-evaluations">
+        <h3>Évaluations Récentes</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Documents</th>
+                        <th>QCM</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-evaluations-body">
+                    <tr>
+                        <td colspan="6" class="empty-state">Aucune évaluation récente</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/home.js"></script>
+{% endblock %}

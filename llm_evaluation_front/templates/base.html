@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Système d'Évaluation LLM{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>LLM Eval</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/" class="{% block home_active %}{% endblock %}">Accueil</a></li>
+                <li><a href="/documents" class="{% block documents_active %}{% endblock %}">Documents</a></li>
+                <li><a href="/evaluations" class="{% block evaluations_active %}{% endblock %}">Évaluations</a></li>
+                <li><a href="/reports" class="{% block reports_active %}{% endblock %}">Rapports</a></li>
+                <li><a href="/llm-panel" class="{% block llm_active %}{% endblock %}">LLM Panel</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <header class="top-bar">
+                <h1>{% block page_title %}Tableau de Bord{% endblock %}</h1>
+                <div class="actions">
+                    {% block actions %}{% endblock %}
+                </div>
+            </header>
+            
+            <div class="main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
