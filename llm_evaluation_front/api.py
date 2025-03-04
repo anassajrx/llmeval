@@ -63,8 +63,11 @@ class ConnectionManager:
         for connection in self.active_connections[channel]:
             try:
                 await connection.send_json(message)
+            except WebSocketDisconnect:
+                disconnected.append(connection)
+                logger.info(f"Client disconnected from {channel} channel during broadcast")
             except Exception as e:
-                logger.error(f"Error sending message to websocket: {str(e)}")
+                logger.warning(f"Error sending WebSocket message: {str(e)}")
                 disconnected.append(connection)
         
         # Nettoyer les connexions déconnectées
@@ -214,6 +217,16 @@ async def get_reports():
         logger.error(f"Error getting reports: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve reports: {str(e)}")
 
+@app.get("/api/reports/filter")
+async def filter_reports(evaluation_id: Optional[str] = None, document_id: Optional[str] = None, 
+                         date_from: Optional[str] = None, date_to: Optional[str] = None):
+    try:
+        reports = await service.get_reports(evaluation_id, document_id, date_from, date_to)
+        return JSONResponse(content={"reports": reports})
+    except Exception as e:
+        logger.error(f"Error filtering reports: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to filter reports: {str(e)}")
+
 @app.get("/api/reports/{report_id}")
 async def get_report(report_id: str):
     try:
@@ -233,12 +246,21 @@ async def download_report(report_id: str, format: str = "html"):
         report_path = await service.download_report(report_id, format)
         if not report_path:
             raise HTTPException(status_code=404, detail=f"Report with ID {report_id} not found or format {format} not available")
-        return FileResponse(path=report_path, filename=f"report_{report_id}.{format}")
+            
+        # Créer un nom de fichier propre pour le téléchargement
+        report = await service.get_report(report_id)
+        evaluation_id = report.get("evaluation_id", "unknown")
+        date_str = datetime.now().strftime("%Y%m%d")
+        
+        filename = f"LLM_Evaluation_Report_{evaluation_id}_{date_str}.{format}"
+        
+        return FileResponse(path=report_path, filename=filename)
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error downloading report {report_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to download report: {str(e)}")
+    
 
 # API Routes - LLM
 @app.get("/api/llm/info")

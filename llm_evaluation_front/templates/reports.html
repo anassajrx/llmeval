@@ -7,17 +7,26 @@
 {% block content %}
 <div class="reports-container">
     <div class="report-filters">
-        <div class="filter-group">
-            <label for="report-filter">Filtrer par:</label>
-            <select id="report-filter">
-                <option value="all">Tous les rapports</option>
-                <option value="recent">Récents (7 derniers jours)</option>
-                <option value="document">Par document</option>
-            </select>
-        </div>
-        <div class="filter-group" id="document-filter-container" style="display: none;">
-            <label for="document-filter">Document:</label>
-            <select id="document-filter"></select>
+        <h3>Filtres</h3>
+        <div class="filter-form">
+            <div class="filter-group">
+                <label for="date-from">Date du:</label>
+                <input type="date" id="date-from" class="form-control">
+            </div>
+            <div class="filter-group">
+                <label for="date-to">Au:</label>
+                <input type="date" id="date-to" class="form-control">
+            </div>
+            <div class="filter-group" id="evaluation-filter-container">
+                <label for="evaluation-filter">Évaluation:</label>
+                <select id="evaluation-filter" class="form-control"></select>
+            </div>
+            <div class="filter-group" id="document-filter-container">
+                <label for="document-filter">Document:</label>
+                <select id="document-filter" class="form-control"></select>
+            </div>
+            <button id="apply-filters-btn" class="primary-btn">Appliquer</button>
+            <button id="reset-filters-btn" class="secondary-btn">Réinitialiser</button>
         </div>
     </div>
     
@@ -30,13 +39,16 @@
                         <th>ID Rapport</th>
                         <th>Date</th>
                         <th>Évaluation</th>
+                        <th>Documents</th>
+                        <th>QCM</th>
                         <th>Score</th>
-                        <th>Actions</th>
+                        <th>Format</th>
+                        <th style="width: 180px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="reports-table-body">
                     <tr>
-                        <td colspan="5" class="empty-state">Aucun rapport disponible</td>
+                        <td colspan="8" class="empty-state">Aucun rapport disponible</td>
                     </tr>
                 </tbody>
             </table>
@@ -46,41 +58,19 @@
     <div class="report-viewer" id="report-viewer">
         <h3>Visualisation du rapport</h3>
         <div class="report-actions">
-            <button id="export-report-btn" class="secondary-btn" disabled>Exporter</button>
+            <div class="download-options">
+                <button id="download-html-btn" class="action-btn" disabled><i class="fas fa-download"></i> HTML</button>
+                <button id="download-json-btn" class="action-btn" disabled><i class="fas fa-download"></i> JSON</button>
+                <button id="download-csv-btn" class="action-btn" disabled><i class="fas fa-download"></i> CSV</button>
+            </div>
         </div>
         <div class="report-content" id="report-content">
             <div class="report-placeholder">Sélectionnez un rapport pour le visualiser</div>
         </div>
     </div>
 </div>
-
-<div class="modal" id="report-export-modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>Exporter le rapport</h2>
-        <div class="export-options">
-            <button class="export-btn" data-format="html">
-                <span class="format-icon">HTML</span>
-                <span class="format-name">Page Web</span>
-            </button>
-            <button class="export-btn" data-format="pdf">
-                <span class="format-icon">PDF</span>
-                <span class="format-name">Document PDF</span>
-            </button>
-            <button class="export-btn" data-format="csv">
-                <span class="format-icon">CSV</span>
-                <span class="format-name">Données CSV</span>
-            </button>
-            <button class="export-btn" data-format="json">
-                <span class="format-icon">JSON</span>
-                <span class="format-name">Données JSON</span>
-            </button>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/static/js/reports.js"></script>
 {% endblock %}

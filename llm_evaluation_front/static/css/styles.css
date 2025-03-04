@@ -340,31 +340,66 @@ button:disabled {
     border-bottom: none;
 }
 
-.table-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
 .action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    padding: 0.25rem;
+    width: 36px;  /* Largeur fixe */
+    height: 36px;  /* Hauteur fixe */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: white;
+    border: 1px solid #dee2e6;
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .action-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: #f8f9fa;
+}
+
+.view-btn:hover {
+    color: #0d6efd;
+    border-color: #0d6efd;
 }
 
 .action-btn.view-btn:hover {
     color: var(--primary-color);
 }
 
+.view-btn {
+    color: #0d6efd;
+}
+
+.download-btn {
+    color: #198754;
+}
+
+.action-btn.download-btn:hover {
+    color: var(--accent-color);
+}
+
 .action-btn.delete-btn:hover {
     color: var(--danger-color);
 }
+.action-btn i {
+    font-size: 14px;
+}
+
+.download-btn:hover {
+    color: #198754;
+    border-color: #198754;
+}
+
+.action-btn i {
+    font-size: 16px;  /* Taille d'icône plus grande */
+}
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;  /* Centre les boutons horizontalement */
+}
+
 
 .empty-state {
     color: var(--text-secondary);
@@ -691,7 +726,78 @@ button:disabled {
     margin-bottom: 0.5rem;
     font-size: 1.2rem;
 }
+/* Styles supplémentaires pour les rapports */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-top: 1rem;
+}
 
+.download-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.format-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.format-html {
+    background-color: #e7f5ff;
+    color: #0077cc;
+}
+
+.format-json {
+    background-color: #f8f0fc;
+    color: #a61e4d;
+}
+
+.format-csv {
+    background-color: #e9faf1;
+    color: #087f5b;
+}
+
+.json-content {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    font-family: monospace;
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.csv-preview {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius);
+}
+
+tr.selected {
+    background-color: rgba(134, 188, 36, 0.1);
+}
+
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+}
 /* LLM Panel page */
 .llm-panel-container {
     display: grid;
@@ -866,4 +972,50 @@ button:disabled {
     .stat-row {
         grid-template-columns: 1fr;
     }
+}
+
+/* Styles pour les visualisations CSV et JSON */
+.json-viewer {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.csv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.csv-table th, .csv-table td {
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.csv-table th {
+    background-color: var(--light-bg);
+    font-weight: bold;
+}
+
+.csv-table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.csv-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Styles pour rendre le tableau CSV scrollable horizontalement */
+.report-content {
+    overflow-x: auto;
 }

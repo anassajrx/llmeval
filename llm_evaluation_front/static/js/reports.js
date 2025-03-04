@@ -4,70 +4,58 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Éléments DOM
-    const reportFilterEl = document.getElementById('report-filter');
-    const documentFilterContainerEl = document.getElementById('document-filter-container');
+    const dateFromEl = document.getElementById('date-from');
+    const dateToEl = document.getElementById('date-to');
+    const evaluationFilterEl = document.getElementById('evaluation-filter');
     const documentFilterEl = document.getElementById('document-filter');
+    const applyFiltersBtn = document.getElementById('apply-filters-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const reportsTableBodyEl = document.getElementById('reports-table-body');
     const reportContentEl = document.getElementById('report-content');
-    const exportReportBtnEl = document.getElementById('export-report-btn');
-    
-    // Initialiser les modals
-    const reportExportModal = Utils.initModal('report-export-modal');
+    const downloadHtmlBtn = document.getElementById('download-html-btn');
+    const downloadJsonBtn = document.getElementById('download-json-btn');
+    const downloadCsvBtn = document.getElementById('download-csv-btn');
     
     // Variables
     let currentReportId = null;
     let reports = [];
+    let evaluations = [];
     let documents = [];
     
     // Charger les données initiales
     loadInitialData();
     
     // Écouter les événements
-    reportFilterEl.addEventListener('change', filterReports);
-    documentFilterEl.addEventListener('change', filterReports);
+    applyFiltersBtn.addEventListener('click', applyFilters);
+    resetFiltersBtn.addEventListener('click', resetFilters);
     
-    exportReportBtnEl.addEventListener('click', () => {
-        if (currentReportId) {
-            reportExportModal.open();
-        }
-    });
+    downloadHtmlBtn.addEventListener('click', () => downloadReport('html'));
+    downloadJsonBtn.addEventListener('click', () => downloadReport('json'));
+    downloadCsvBtn.addEventListener('click', () => downloadReport('csv'));
     
-    // Ajouter des gestionnaires d'événements pour les boutons d'export
-    document.querySelectorAll('.export-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const format = btn.getAttribute('data-format');
-            if (currentReportId && format) {
-                downloadReport(currentReportId, format);
-                reportExportModal.close();
-            }
-        });
-    });
-    
-    // Vérifier s'il y a un ID de rapport dans l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const reportIdParam = urlParams.get('id');
-    const reportTypeParam = urlParams.get('report');
-    
-    if (reportIdParam && reportTypeParam) {
-        setTimeout(() => {
-            const reportId = findReportByEvaluationAndType(reportIdParam, reportTypeParam);
-            if (reportId) {
-                loadReport(reportId);
-            }
-        }, 500);
-    }
-    
-    /**
-     * Charge les données initiales (rapports et documents)
+        /**
+     * Charge les données initiales (rapports, évaluations, documents)
      */
     async function loadInitialData() {
         try {
+            // D'abord lancer un scan des rapports pour s'assurer que tous sont indexés
+            await fetch('/api/reports/scan');
+            
             // Charger les rapports
             const reportsResponse = await fetch('/api/reports');
             const reportsData = await reportsResponse.json();
             reports = reportsData.reports || [];
             
+            console.log("Reports loaded:", reports.length, reports);  // Log pour débogage
+            
             renderReportsList(reports);
+            
+            // Charger les évaluations
+            const evaluationsResponse = await fetch('/api/evaluations');
+            const evaluationsData = await evaluationsResponse.json();
+            evaluations = evaluationsData.evaluations || [];
+            
+            populateEvaluationFilter(evaluations);
             
             // Charger les documents
             const documentsResponse = await fetch('/api/documents');
@@ -80,6 +68,23 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erreur lors du chargement des données:', error);
             Utils.showToast('Erreur lors du chargement des données', 'error');
         }
+    }
+    
+    /**
+     * Remplit le filtre d'évaluations
+     * @param {Array} evaluations - Liste des évaluations
+     */
+    function populateEvaluationFilter(evaluations) {
+        evaluationFilterEl.innerHTML = '<option value="">Toutes les évaluations</option>';
+        
+        const completedEvals = evaluations.filter(eval => eval.status === 'completed');
+        
+        completedEvals.forEach(eval => {
+            const option = document.createElement('option');
+            option.value = eval.id;
+            option.textContent = `Éval ${eval.id.substring(0, 8)}... (${Utils.formatDate(eval.start_time)})`;
+            evaluationFilterEl.appendChild(option);
+        });
     }
     
     /**
@@ -100,6 +105,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
+     * Applique les filtres sélectionnés
+     */
+    async function applyFilters() {
+        try {
+            const dateFrom = dateFromEl.value ? new Date(dateFromEl.value).toISOString() : null;
+            const dateTo = dateToEl.value ? new Date(dateToEl.value).toISOString() : null;
+            const evaluationId = evaluationFilterEl.value || null;
+            const documentId = documentFilterEl.value || null;
+            
+            // Construire l'URL avec les paramètres de filtre
+            let url = '/api/reports/filter?';
+            if (dateFrom) url += `date_from=${encodeURIComponent(dateFrom)}&`;
+            if (dateTo) url += `date_to=${encodeURIComponent(dateTo)}&`;
+            if (evaluationId) url += `evaluation_id=${encodeURIComponent(evaluationId)}&`;
+            if (documentId) url += `document_id=${encodeURIComponent(documentId)}&`;
+            
+            // Supprimer le dernier '&' si présent
+            url = url.endsWith('&') ? url.slice(0, -1) : url;
+            
+            // Effectuer la requête
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            // Mettre à jour la liste
+            renderReportsList(data.reports || []);
+            
+        } catch (error) {
+            console.error('Erreur lors de l\'application des filtres:', error);
+            Utils.showToast('Erreur lors de l\'application des filtres', 'error');
+        }
+    }
+    
+    /**
+     * Réinitialise les filtres
+     */
+    function resetFilters() {
+        dateFromEl.value = '';
+        dateToEl.value = '';
+        evaluationFilterEl.value = '';
+        documentFilterEl.value = '';
+        
+        // Recharger tous les rapports
+        loadInitialData();
+    }
+    
+    /**
      * Affiche la liste des rapports
      * @param {Array} reportsList - Liste des rapports à afficher
      */
@@ -110,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (reportsList.length === 0) {
             reportsTableBodyEl.innerHTML = `
                 <tr>
-                    <td colspan="5" class="empty-state">Aucun rapport disponible</td>
+                    <td colspan="8" class="empty-state">Aucun rapport disponible</td>
                 </tr>
             `;
             return;
@@ -118,200 +169,258 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Ajouter chaque rapport
         reportsList.forEach(report => {
-            const row = document.createElement('tr');
-            row.setAttribute('data-report-id', report.id);
+            // Pour chaque rapport, créer trois lignes (HTML, JSON, CSV)
+            const formats = ['html', 'json', 'csv'];
             
-            // ID court
-            const idCell = document.createElement('td');
-            idCell.textContent = report.id.substring(0, 8) + '...';
-            row.appendChild(idCell);
-            
-            // Date
-            const dateCell = document.createElement('td');
-            dateCell.textContent = Utils.formatDate(report.creation_date, true);
-            row.appendChild(dateCell);
-            
-            // Évaluation
-            const evalCell = document.createElement('td');
-            evalCell.textContent = report.evaluation_id.substring(0, 8) + '...';
-            row.appendChild(evalCell);
-            
-            // Score
-            const scoreCell = document.createElement('td');
-            scoreCell.textContent = report.score ? `${report.score.toFixed(1)}%` : 'N/A';
-            row.appendChild(scoreCell);
-            
-            // Actions
-            const actionsCell = document.createElement('td');
-            actionsCell.className = 'table-actions';
-            
-            // Bouton visualiser
-            const viewBtn = document.createElement('button');
-            viewBtn.className = 'action-btn view-btn';
-            viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
-            viewBtn.title = 'Visualiser';
-            viewBtn.addEventListener('click', () => loadReport(report.id));
-            actionsCell.appendChild(viewBtn);
-            
-            // Bouton exporter
-            const exportBtn = document.createElement('button');
-            exportBtn.className = 'action-btn';
-            exportBtn.innerHTML = '<i class="fas fa-download"></i>';
-            exportBtn.title = 'Exporter';
-            exportBtn.addEventListener('click', () => {
-                currentReportId = report.id;
-                reportExportModal.open();
+            formats.forEach(format => {
+                if (!report.report_files || !report.report_files[format]) {
+                    return; // Ignorer les formats non disponibles
+                }
+                
+                const row = document.createElement('tr');
+                row.setAttribute('data-report-id', report.id);
+                row.setAttribute('data-format', format);
+                
+                // ID court
+                const idCell = document.createElement('td');
+                idCell.textContent = report.id.substring(0, 8) + '...';
+                row.appendChild(idCell);
+                
+                // Date
+                const dateCell = document.createElement('td');
+                dateCell.textContent = Utils.formatDate(report.creation_date, true);
+                row.appendChild(dateCell);
+                
+                // Évaluation
+                const evalCell = document.createElement('td');
+                evalCell.textContent = report.evaluation_id.substring(0, 8) + '...';
+                row.appendChild(evalCell);
+                
+                // Documents
+                const docsCell = document.createElement('td');
+                const docNames = report.documents ? report.documents.map(d => d.name).join(', ') : 'N/A';
+                docsCell.textContent = Utils.truncateString(docNames, 30);
+                docsCell.title = docNames; // Afficher le nom complet au survol
+                row.appendChild(docsCell);
+                
+                // QCM
+                const qcmCell = document.createElement('td');
+                qcmCell.textContent = report.total_qcm || 'N/A';
+                row.appendChild(qcmCell);
+                
+                // Score
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = report.score ? `${report.score.toFixed(1)}%` : 'N/A';
+                row.appendChild(scoreCell);
+                
+                // Format
+                const formatCell = document.createElement('td');
+                formatCell.innerHTML = `<span class="format-badge format-${format}">${format.toUpperCase()}</span>`;
+                row.appendChild(formatCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'table-actions';
+
+                // Bouton visualiser
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'action-btn view-btn';
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i>';  // Icône uniquement
+                viewBtn.title = `Visualiser (${format.toUpperCase()})`;
+                viewBtn.addEventListener('click', () => loadReport(report.id, format));
+                actionsCell.appendChild(viewBtn);
+
+                // Bouton télécharger
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'action-btn download-btn';
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';  // Icône uniquement
+                downloadBtn.title = `Télécharger (${format.toUpperCase()})`;
+                downloadBtn.addEventListener('click', () => downloadReport(format, report.id));
+                actionsCell.appendChild(downloadBtn);
+
+                row.appendChild(actionsCell);
+                
+                reportsTableBodyEl.appendChild(row);
             });
-            actionsCell.appendChild(exportBtn);
-            
-            row.appendChild(actionsCell);
-            
-            reportsTableBodyEl.appendChild(row);
         });
     }
     
     /**
-     * Filtre les rapports selon les critères sélectionnés
-     */
-    function filterReports() {
-        const filterType = reportFilterEl.value;
-        const documentId = documentFilterEl.value;
+ * Charge et affiche un rapport
+ * @param {string} reportId - ID du rapport
+ * @param {string} format - Format du rapport à afficher (html, json, csv)
+ */
+async function loadReport(reportId, format = 'html') {
+    try {
+        // Afficher un message de chargement
+        reportContentEl.innerHTML = '<div class="loading">Chargement du rapport...</div>';
         
-        // Afficher/masquer le filtre de document
-        documentFilterContainerEl.style.display = filterType === 'document' ? 'block' : 'none';
+        // Activer les boutons de téléchargement
+        downloadHtmlBtn.disabled = false;
+        downloadJsonBtn.disabled = false;
+        downloadCsvBtn.disabled = false;
         
-        let filteredReports = [...reports];
+        // Mémoriser l'ID du rapport courant
+        currentReportId = reportId;
         
-        // Appliquer le filtre
-        if (filterType === 'recent') {
-            // Rapports des 7 derniers jours
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            
-            filteredReports = filteredReports.filter(report => {
-                const reportDate = new Date(report.creation_date);
-                return reportDate >= sevenDaysAgo;
-            });
-        } else if (filterType === 'document' && documentId) {
-            // Rapports pour un document spécifique
-            filteredReports = filteredReports.filter(report => {
-                // Vérifier dans les métadonnées de l'évaluation
-                // Note: Ceci est une approximation car nous n'avons pas directement l'information
-                // Une meilleure implémentation nécessiterait de stocker cette relation
-                return report.document_id === documentId;
-            });
+        // Mettre en évidence la ligne sélectionnée
+        const rows = reportsTableBodyEl.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.classList.remove('selected');
+            if (row.getAttribute('data-report-id') === reportId && 
+                row.getAttribute('data-format') === format) {
+                row.classList.add('selected');
+            }
+        });
+        
+        // Charger le rapport
+        const response = await fetch(`/api/reports/${reportId}`);
+        const report = await response.json();
+        
+        // Récupérer le chemin du fichier pour le format demandé
+        const filePath = report.report_files?.[format];
+        
+        if (!filePath) {
+            reportContentEl.innerHTML = '<div class="error">Format de rapport non disponible</div>';
+            return;
         }
         
-        // Afficher les rapports filtrés
-        renderReportsList(filteredReports);
-    }
-    
-    /**
-     * Charge et affiche un rapport
-     * @param {string} reportId - ID du rapport
-     */
-    async function loadReport(reportId) {
-        try {
-            // Afficher un message de chargement
-            reportContentEl.innerHTML = '<div class="loading">Chargement du rapport...</div>';
+        // Charger le contenu du fichier selon le format
+        const fileResponse = await fetch(`/api/reports/download/${reportId}?format=${format}`);
+        
+        if (!fileResponse.ok) {
+            reportContentEl.innerHTML = '<div class="error">Erreur lors du chargement du fichier</div>';
+            return;
+        }
+        
+        // Traiter selon le format
+        if (format === 'html') {
+            // Pour HTML, utiliser un iframe
+            const htmlContent = await fileResponse.text();
             
-            // Activer le bouton d'export
-            exportReportBtnEl.disabled = false;
+            // Créer un iframe pour isoler les styles
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            iframe.style.border = 'none';
             
-            // Mémoriser l'ID du rapport courant
-            currentReportId = reportId;
+            reportContentEl.innerHTML = '';
+            reportContentEl.appendChild(iframe);
             
-            // Mettre en évidence la ligne sélectionnée
-            const rows = reportsTableBodyEl.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.classList.remove('selected');
-                if (row.getAttribute('data-report-id') === reportId) {
-                    row.classList.add('selected');
-                }
+            // Écrire le contenu HTML dans l'iframe
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(htmlContent);
+            doc.close();
+            
+            // Ajuster la hauteur de l'iframe
+            iframe.style.height = `${doc.body.scrollHeight + 30}px`;
+            
+        } else if (format === 'json') {
+            // Pour JSON, afficher avec mise en forme et coloration syntaxique
+            const jsonContent = await fileResponse.json();
+            const pre = document.createElement('pre');
+            pre.className = 'json-viewer';
+            
+            // Formatter le JSON avec une indentation de 2 espaces
+            pre.textContent = JSON.stringify(jsonContent, null, 2);
+            
+            reportContentEl.innerHTML = '';
+            reportContentEl.appendChild(pre);
+            
+            // Si disponible, on pourrait ajouter une bibliothèque de coloration syntaxique
+            // comme highlight.js ici
+            
+        } else if (format === 'csv') {
+            // Pour CSV, créer un tableau HTML
+            const csvContent = await fileResponse.text();
+            const table = document.createElement('table');
+            table.className = 'csv-table';
+            
+            // Parser le CSV
+            const rows = csvContent.split('\n');
+            const header = rows[0].split(',');
+            
+            // Créer l'en-tête du tableau
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            header.forEach(cell => {
+                const th = document.createElement('th');
+                th.textContent = cell.replace(/"/g, ''); // Supprimer les guillemets
+                headerRow.appendChild(th);
             });
             
-            // Charger le rapport
-            const response = await fetch(`/api/reports/${reportId}`);
-            const report = await response.json();
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
             
-            if (report && report.content) {
-                // Afficher le contenu du rapport
-                reportContentEl.innerHTML = report.content;
-            } else {
-                reportContentEl.innerHTML = '<div class="error">Impossible de charger le contenu du rapport</div>';
+            // Créer le corps du tableau
+            const tbody = document.createElement('tbody');
+            
+            // Ajouter toutes les lignes sauf l'en-tête
+            for (let i = 1; i < rows.length; i++) {
+                if (rows[i].trim() === '') continue; // Ignorer les lignes vides
+                
+                const row = document.createElement('tr');
+                const cells = rows[i].split(',');
+                
+                cells.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell.replace(/"/g, ''); // Supprimer les guillemets
+                    row.appendChild(td);
+                });
+                
+                tbody.appendChild(row);
             }
             
-        } catch (error) {
-            console.error('Erreur lors du chargement du rapport:', error);
-            reportContentEl.innerHTML = '<div class="error">Erreur lors du chargement du rapport</div>';
+            table.appendChild(tbody);
+            
+            // Ajouter le tableau au conteneur
+            reportContentEl.innerHTML = '';
+            reportContentEl.appendChild(table);
         }
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement du rapport:', error);
+        reportContentEl.innerHTML = '<div class="error">Erreur lors du chargement du rapport</div>';
     }
+}
     
     /**
      * Télécharge un rapport dans un format spécifique
-     * @param {string} reportId - ID du rapport
      * @param {string} format - Format de téléchargement (html, pdf, csv, json)
+     * @param {string} reportId - ID du rapport (optionnel, utilise le rapport courant si non spécifié)
      */
-    async function downloadReport(reportId, format) {
+    async function downloadReport(format, reportId = null) {
+        // Utiliser le rapport courant si non spécifié
+        const id = reportId || currentReportId;
+        
+        if (!id) {
+            Utils.showToast('Aucun rapport sélectionné', 'error');
+            return;
+        }
+        
         try {
             // Afficher un message de chargement
             Utils.showToast(`Préparation du téléchargement en format ${format.toUpperCase()}...`, 'info');
             
-            // Demander le téléchargement
-            const response = await fetch(`/api/reports/download/${reportId}?format=${format}`);
+            // Créer l'URL de téléchargement
+            const downloadUrl = `/api/reports/download/${id}?format=${format}`;
             
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
+            // Créer un lien et déclencher le téléchargement
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `rapport_evaluation_llm_${format}.${format}`;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             
-            // S'il s'agit d'un JSON avec une URL de téléchargement
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                if (data.download_url) {
-                    // Créer un lien et déclencher le téléchargement
-                    const a = document.createElement('a');
-                    a.href = data.download_url;
-                    a.download = `report_${reportId}.${format}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    Utils.showToast('Téléchargement démarré', 'success');
-                } else {
-                    throw new Error('URL de téléchargement non disponible');
-                }
-            } else {
-                // Téléchargement direct du blob
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `report_${reportId}.${format}`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                Utils.showToast('Téléchargement démarré', 'success');
-            }
+            Utils.showToast('Téléchargement démarré', 'success');
             
         } catch (error) {
             console.error('Erreur lors du téléchargement du rapport:', error);
             Utils.showToast('Erreur lors du téléchargement du rapport', 'error');
         }
-    }
-    
-    /**
-     * Trouve un ID de rapport à partir de l'ID d'évaluation et du type de rapport
-     * @param {string} evaluationId - ID de l'évaluation
-     * @param {string} reportType - Type de rapport
-     * @returns {string|null} ID du rapport ou null si non trouvé
-     */
-    function findReportByEvaluationAndType(evaluationId, reportType) {
-        for (const report of reports) {
-            if (report.evaluation_id === evaluationId) {
-                return report.id;
-            }
-        }
-        return null;
     }
 });

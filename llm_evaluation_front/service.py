@@ -53,8 +53,6 @@ class LLMEvaluationService:
         self.frontend_reports_dir.mkdir(parents=True, exist_ok=True)
         
         logger.info("LLM Evaluation Service initialized successfully")
-    
-    # Correction dans la méthode upload_document de la classe LLMEvaluationService
 
     async def upload_document(self, file: UploadFile) -> Dict[str, Any]:
         """
@@ -95,8 +93,7 @@ class LLMEvaluationService:
             
             # Sauvegarder les métadonnées du document
             doc_meta_path = self.frontend_data_dir / f"document_{doc_id}.json"
-            with open(doc_meta_path, "w") as f:
-                json.dump(doc_info, f)
+            await self._save_json_file(doc_meta_path, doc_info)
             
             logger.info(f"Document uploaded successfully: {doc_id}")
             return doc_info
@@ -120,7 +117,7 @@ class LLMEvaluationService:
             
             for meta_file in meta_files:
                 try:
-                    with open(meta_file, "r") as f:
+                    with open(meta_file, "r", encoding="utf-8") as f:
                         doc_info = json.load(f)
                     
                     # Vérifier si le fichier existe toujours
@@ -130,8 +127,7 @@ class LLMEvaluationService:
                         # Mettre à jour le statut si le fichier n'existe plus
                         doc_info["status"] = "missing"
                         documents.append(doc_info)
-                        with open(meta_file, "w") as f:
-                            json.dump(doc_info, f)
+                        await self._save_json_file(meta_file, doc_info)
                 except Exception as e:
                     logger.error(f"Error reading document metadata {meta_file}: {str(e)}")
             
@@ -160,7 +156,7 @@ class LLMEvaluationService:
             if not meta_path.exists():
                 return None
                 
-            with open(meta_path, "r") as f:
+            with open(meta_path, "r", encoding="utf-8") as f:
                 doc_info = json.load(f)
                 
             # Vérifier si le fichier existe toujours
@@ -192,7 +188,7 @@ class LLMEvaluationService:
                 return {"success": False, "error": "Document not found"}
                 
             # Charger les métadonnées
-            with open(meta_path, "r") as f:
+            with open(meta_path, "r", encoding="utf-8") as f:
                 doc_info = json.load(f)
                 
             # Supprimer le fichier s'il existe
@@ -252,12 +248,7 @@ class LLMEvaluationService:
             self.evaluations[evaluation_id] = evaluation_info
             
             # Sauvegarder dans un fichier
-            eval_meta_path = self.frontend_data_dir / f"evaluation_{evaluation_id}.json"
-            with open(eval_meta_path, "w") as f:
-                # Copier les données sans les chemins complets pour la sécurité
-                safe_eval_info = evaluation_info.copy()
-                safe_eval_info.pop("document_paths")
-                json.dump(safe_eval_info, f)
+            await self._save_evaluation_metadata(evaluation_id)
             
             logger.info(f"Evaluation {evaluation_id} started for documents: {document_ids}")
             return evaluation_id
@@ -298,32 +289,27 @@ class LLMEvaluationService:
             evaluation_results = self.evaluation_system.evaluate_model(qcm_list)
             
             # Générer les rapports
-            report_paths = self.evaluation_system.generate_reports(evaluation_results)
-            
-            # Copier les rapports dans le répertoire frontend
-            for report_type, report_path in report_paths.items():
-                dest_path = self.frontend_reports_dir / f"{evaluation_id}_{report_type}.html"
-                shutil.copy(report_path, dest_path)
+            report_paths = await self.generate_reports(evaluation_id, evaluation_results)
             
             # Mettre à jour le statut final
             self.evaluations[evaluation_id]["status"] = "completed"
             self.evaluations[evaluation_id]["end_time"] = datetime.now().isoformat()
             self.evaluations[evaluation_id]["progress"] = 100.0
-            self.evaluations[evaluation_id]["report_paths"] = {
-                k: str(self.frontend_reports_dir / f"{evaluation_id}_{k}.html")
-                for k in report_paths.keys()
-            }
+            self.evaluations[evaluation_id]["report_paths"] = report_paths
             self.evaluations[evaluation_id]["results"] = evaluation_results
             
             # Sauvegarder les métadonnées finales
             await self._save_evaluation_metadata(evaluation_id)
             
-            # Notification finale
-            await manager.broadcast({
-                "type": "evaluation_completed",
-                "evaluation_id": evaluation_id,
-                "timestamp": datetime.now().isoformat()
-            }, "notifications")
+            # Notification finale avec gestion d'erreur
+            try:
+                await manager.broadcast({
+                    "type": "evaluation_completed",
+                    "evaluation_id": evaluation_id,
+                    "timestamp": datetime.now().isoformat()
+                }, "notifications")
+            except Exception as e:
+                logger.warning(f"Non-critical: Error broadcasting completion message: {str(e)}")
             
         except Exception as e:
             # Gérer les erreurs
@@ -338,13 +324,16 @@ class LLMEvaluationService:
                 # Sauvegarder les métadonnées
                 await self._save_evaluation_metadata(evaluation_id)
                 
-                # Notification d'erreur
-                await manager.broadcast({
-                    "type": "evaluation_error",
-                    "evaluation_id": evaluation_id,
-                    "error": str(e),
-                    "timestamp": datetime.now().isoformat()
-                }, "notifications")
+                # Notification d'erreur avec gestion d'erreur
+                try:
+                    await manager.broadcast({
+                        "type": "evaluation_error",
+                        "evaluation_id": evaluation_id,
+                        "error": str(e),
+                        "timestamp": datetime.now().isoformat()
+                    }, "notifications")
+                except Exception as ex:
+                    logger.warning(f"Non-critical: Error broadcasting error message: {str(ex)}")
     
     async def _update_evaluation_status(self, evaluation_id: str, manager) -> None:
         """
@@ -365,7 +354,11 @@ class LLMEvaluationService:
                 "completed_qcm": eval_info["completed_qcm"],
                 "timestamp": datetime.now().isoformat()
             }
-            await manager.broadcast(status_update, "evaluation_status")
+            
+            try:
+                await manager.broadcast(status_update, "evaluation_status")
+            except Exception as e:
+                logger.warning(f"Non-critical: Error updating evaluation status: {str(e)}")
     
     async def _save_evaluation_metadata(self, evaluation_id: str) -> None:
         """
@@ -382,9 +375,8 @@ class LLMEvaluationService:
             if "document_paths" in safe_eval_info:
                 safe_eval_info.pop("document_paths")
             
-            with open(eval_meta_path, "w") as f:
-                json.dump(safe_eval_info, f)
-                
+            await self._save_json_file(eval_meta_path, safe_eval_info)
+            
             logger.info(f"Saved evaluation metadata for {evaluation_id}")
     
     async def _generate_qcm_with_updates(self, evaluation_id: str, context: str, 
@@ -427,12 +419,15 @@ class LLMEvaluationService:
                 self.evaluations[evaluation_id]["progress"] = min(progress, 99.0)  # Max 99% jusqu'à la fin
                 
                 # Envoyer la mise à jour QCM
-                await manager.broadcast({
-                    "type": "qcm_generated",
-                    "evaluation_id": evaluation_id,
-                    "qcm": qcm,
-                    "timestamp": datetime.now().isoformat()
-                }, "qcm_updates")
+                try:
+                    await manager.broadcast({
+                        "type": "qcm_generated",
+                        "evaluation_id": evaluation_id,
+                        "qcm": qcm,
+                        "timestamp": datetime.now().isoformat()
+                    }, "qcm_updates")
+                except Exception as e:
+                    logger.warning(f"Non-critical: Error broadcasting QCM update: {str(e)}")
                 
                 # Mettre à jour le statut de l'évaluation
                 await self._update_evaluation_status(evaluation_id, manager)
@@ -465,11 +460,12 @@ class LLMEvaluationService:
             
             for meta_file in meta_files:
                 try:
-                    with open(meta_file, "r") as f:
+                    with open(meta_file, "r", encoding="utf-8") as f:
                         evaluation_info = json.load(f)
                     
                     # Exclure la liste des QCM pour alléger les données
                     if "qcm_list" in evaluation_info:
+                        evaluation_info["qcm_count"] = len(evaluation_info["qcm_list"])
                         evaluation_info.pop("qcm_list")
                     
                     evaluations.append(evaluation_info)
@@ -507,7 +503,7 @@ class LLMEvaluationService:
             if not meta_path.exists():
                 return None
                 
-            with open(meta_path, "r") as f:
+            with open(meta_path, "r", encoding="utf-8") as f:
                 evaluation_info = json.load(f)
                 
             return evaluation_info
@@ -537,7 +533,7 @@ class LLMEvaluationService:
             if not meta_path.exists():
                 return None
                 
-            with open(meta_path, "r") as f:
+            with open(meta_path, "r", encoding="utf-8") as f:
                 evaluation_info = json.load(f)
                 
             return evaluation_info.get("qcm_list", [])
@@ -546,56 +542,310 @@ class LLMEvaluationService:
             logger.error(f"Error getting QCM for evaluation {evaluation_id}: {str(e)}")
             raise
     
-    async def get_reports(self) -> List[Dict[str, Any]]:
+    async def generate_reports(self, evaluation_id: str, evaluation_results: Dict[str, Any] = None) -> Dict[str, str]:
         """
-        Récupère la liste des rapports disponibles
+        Génère les rapports pour une évaluation
         
+        Args:
+            evaluation_id: ID de l'évaluation
+            evaluation_results: Résultats de l'évaluation (optionnel)
+            
+        Returns:
+            Dict[str, str]: Chemins des rapports générés
+        """
+        try:
+            # Si les résultats ne sont pas fournis, récupérer l'évaluation
+            if evaluation_results is None:
+                evaluation = await self.get_evaluation(evaluation_id)
+                if not evaluation:
+                    raise ValueError(f"Evaluation {evaluation_id} not found")
+                evaluation_results = evaluation.get("results", {})
+            else:
+                evaluation = await self.get_evaluation(evaluation_id)
+                if not evaluation:
+                    raise ValueError(f"Evaluation {evaluation_id} not found")
+            
+            # Structure pour stocker les chemins des rapports
+            report_paths = {}
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            # Créer un ID unique pour ce groupe de rapports
+            report_group_id = str(uuid.uuid4())
+            
+            # Informations sur les documents liés à cette évaluation
+            eval_documents = []
+            for doc_id in evaluation.get("documents", []):
+                doc_info = await self.get_document(doc_id)
+                if doc_info:
+                    eval_documents.append({
+                        "id": doc_id,
+                        "name": doc_info.get("original_name", "Unknown")
+                    })
+            
+            # Générer le rapport HTML
+            html_path = self.frontend_reports_dir / f"report_{evaluation_id}_{timestamp}.html"
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(self._generate_html_report(evaluation, evaluation_results))
+            report_paths["html"] = str(html_path)
+            
+            # Générer le rapport JSON
+            json_path = self.frontend_reports_dir / f"report_{evaluation_id}_{timestamp}.json"
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "evaluation": evaluation,
+                    "results": evaluation_results
+                }, f, ensure_ascii=False, indent=4, sort_keys=True)
+            report_paths["json"] = str(json_path)
+            
+            # Générer le rapport CSV avec les QCM
+            csv_path = self.frontend_reports_dir / f"report_{evaluation_id}_{timestamp}.csv"
+            self._generate_csv_report(evaluation, evaluation_results, csv_path)
+            report_paths["csv"] = str(csv_path)
+            
+            # Enregistrer les métadonnées du rapport
+            report_meta = {
+                "id": report_group_id,
+                "evaluation_id": evaluation_id,
+                "creation_date": datetime.now().isoformat(),
+                "report_files": report_paths,
+                "document_ids": evaluation.get("documents", []),
+                "documents": eval_documents,
+                "total_qcm": evaluation.get("completed_qcm", 0),
+                "score": evaluation_results.get("total_score", 0),
+                "status": "completed"
+            }
+            
+            # Sauvegarder les métadonnées du rapport
+            report_meta_path = self.frontend_data_dir / f"report_{report_group_id}.json"
+            await self._save_json_file(report_meta_path, report_meta)
+            
+            return report_paths
+        except Exception as e:
+            logger.error(f"Error generating reports: {str(e)}")
+            raise
+        
+    def _generate_csv_report(self, evaluation: Dict, results: Dict, csv_path: Path) -> None:
+        """
+        Génère un rapport CSV avec les résultats des QCM
+        
+        Args:
+            evaluation: Données de l'évaluation
+            results: Résultats de l'évaluation
+            csv_path: Chemin du fichier CSV à générer
+        """
+        import csv
+        
+        try:
+            qcm_list = evaluation.get("qcm_list", [])
+            details = results.get("details", [])
+            
+            # Créer un dictionnaire de résultats pour un accès facile
+            results_dict = {}
+            for detail in details:
+                question = detail.get("question", "")
+                results_dict[question] = detail
+            
+            with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Écrire l'en-tête
+                writer.writerow([
+                    "Critère", "Type", "Difficulté", "Question", 
+                    "Réponse A", "Réponse B", "Réponse C", "Réponse D", 
+                    "Réponse Correcte", "Réponse du Modèle", "Score"
+                ])
+                
+                # Écrire les données pour chaque QCM
+                for qcm in qcm_list:
+                    question = qcm.get("question", "")
+                    result = results_dict.get(question, {})
+                    
+                    row = [
+                        qcm.get("criterion", ""),
+                        qcm.get("type", ""),
+                        qcm.get("difficulty", ""),
+                        question,
+                        qcm.get("choices", {}).get("A", ""),
+                        qcm.get("choices", {}).get("B", ""),
+                        qcm.get("choices", {}).get("C", ""),
+                        qcm.get("choices", {}).get("D", ""),
+                        qcm.get("correct_answer", ""),
+                        result.get("model_answer", ""),
+                        result.get("score", 0)
+                    ]
+                    
+                    writer.writerow(row)
+        except Exception as e:
+            logger.error(f"Error generating CSV report: {str(e)}")
+            # Créer un CSV minimal en cas d'erreur
+            with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["Error generating report", str(e)])
+    
+    def _generate_html_report(self, evaluation: Dict, results: Dict) -> str:
+        """
+        Génère le contenu HTML d'un rapport d'évaluation
+        
+        Args:
+            evaluation: Données de l'évaluation
+            results: Résultats de l'évaluation
+            
+        Returns:
+            str: Contenu HTML
+        """
+        eval_id = evaluation.get("id", "")
+        start_time = evaluation.get("start_time", "")
+        end_time = evaluation.get("end_time", "")
+        total_qcm = evaluation.get("completed_qcm", 0)
+        
+        total_score = results.get("total_score", 0)
+        success_rate = results.get("success_rate", 0)
+        criteria_scores = results.get("criteria_scores", {})
+        
+        # Construire une table pour les scores par critère
+        criteria_table = ""
+        for criterion, stats in criteria_scores.items():
+            score_pct = (stats.get("score", 0) / stats.get("total", 1)) * 100 if stats.get("total", 0) > 0 else 0
+            criteria_table += f"""
+            <tr>
+                <td>{criterion}</td>
+                <td>{score_pct:.1f}%</td>
+                <td>{stats.get("success_count", 0)}/{stats.get("questions_count", 0)}</td>
+            </tr>
+            """
+        
+        # Construire une table pour les QCM
+        qcm_table = ""
+        for detail in results.get("details", []):
+            qcm_table += f"""
+            <tr>
+                <td>{detail.get("criterion", "")}</td>
+                <td>{detail.get("question", "")}</td>
+                <td>{detail.get("correct_answer", "")}</td>
+                <td>{detail.get("model_answer", "")}</td>
+                <td>{detail.get("score", 0)}/{detail.get("max_points", 0)}</td>
+            </tr>
+            """
+        
+        # Générer le rapport complet
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Rapport d'Évaluation LLM</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                h1, h2, h3 {{ color: #333; }}
+                table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                th {{ background-color: #f2f2f2; }}
+                .summary {{ margin: 20px 0; }}
+                .summary-item {{ margin-bottom: 10px; }}
+                .score {{font-weight: bold; color: #86bc24; }}
+            </style>
+        </head>
+        <body>
+            <h1>Rapport d'Évaluation LLM</h1>
+            
+            <div class="summary">
+                <h2>Résumé</h2>
+                <div class="summary-item"><strong>ID:</strong> {eval_id}</div>
+                <div class="summary-item"><strong>Date de début:</strong> {start_time}</div>
+                <div class="summary-item"><strong>Date de fin:</strong> {end_time}</div>
+                <div class="summary-item"><strong>Total QCM:</strong> {total_qcm}</div>
+                <div class="summary-item"><strong>Score global:</strong> <span class="score">{total_score:.1f}%</span></div>
+                <div class="summary-item"><strong>Taux de succès:</strong> {success_rate:.1f}%</div>
+            </div>
+            
+            <h2>Performance par Critère</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Score (%)</th>
+                        <th>Succès/Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {criteria_table}
+                </tbody>
+            </table>
+            
+            <h2>Détails des QCM</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Question</th>
+                        <th>Réponse Correcte</th>
+                        <th>Réponse du Modèle</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {qcm_table}
+                </tbody>
+            </table>
+        </body>
+        </html>
+        """
+        
+        return html
+    
+    async def get_reports(self, evaluation_id: Optional[str] = None, 
+                      document_id: Optional[str] = None,
+                      date_from: Optional[str] = None, 
+                      date_to: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Récupère la liste des rapports disponibles avec filtrage
+        
+        Args:
+            evaluation_id: Filtrer par ID d'évaluation
+            document_id: Filtrer par ID de document
+            date_from: Filtrer par date à partir de (format ISO)
+            date_to: Filtrer par date jusqu'à (format ISO)
+            
         Returns:
             List[Dict[str, Any]]: Liste des rapports
         """
         try:
             reports = []
             
-            # Chercher tous les fichiers de rapports
-            report_files = list(self.frontend_reports_dir.glob("*_html.html"))
+            # Chercher tous les fichiers de métadonnées de rapports
+            meta_files = list(self.frontend_data_dir.glob("report_*.json"))
             
-            # Regrouper les rapports par ID d'évaluation
-            report_groups = {}
-            for report_file in report_files:
+            for meta_file in meta_files:
                 try:
-                    file_name = report_file.name
-                    eval_id = file_name.split("_")[0]
-                    report_type = file_name.split("_")[1].split(".")[0]
+                    with open(meta_file, "r", encoding="utf-8") as f:
+                        report_data = json.load(f)
                     
-                    if eval_id not in report_groups:
-                        report_groups[eval_id] = {
-                            "id": str(uuid.uuid4()),
-                            "evaluation_id": eval_id,
-                            "creation_date": datetime.fromtimestamp(report_file.stat().st_mtime).isoformat(),
-                            "report_files": {}
-                        }
+                    # Appliquer les filtres
+                    if evaluation_id and report_data.get("evaluation_id") != evaluation_id:
+                        continue
+                        
+                    if document_id and document_id not in report_data.get("document_ids", []):
+                        continue
+                        
+                    if date_from:
+                        report_date = datetime.fromisoformat(report_data.get("creation_date", ""))
+                        filter_date = datetime.fromisoformat(date_from)
+                        if report_date < filter_date:
+                            continue
+                            
+                    if date_to:
+                        report_date = datetime.fromisoformat(report_data.get("creation_date", ""))
+                        filter_date = datetime.fromisoformat(date_to)
+                        if report_date > filter_date:
+                            continue
                     
-                    report_groups[eval_id]["report_files"][report_type] = str(report_file)
+                    reports.append(report_data)
                 except Exception as e:
-                    logger.error(f"Error processing report file {report_file}: {str(e)}")
-            
-            # Convertir les groupes en liste
-            for eval_id, report_data in report_groups.items():
-                # Récupérer le score si disponible
-                try:
-                    eval_meta_path = self.frontend_data_dir / f"evaluation_{eval_id}.json"
-                    if eval_meta_path.exists():
-                        with open(eval_meta_path, "r") as f:
-                            eval_info = json.load(f)
-                            if "results" in eval_info and "total_score" in eval_info["results"]:
-                                report_data["score"] = eval_info["results"]["total_score"]
-                except Exception as e:
-                    logger.error(f"Error retrieving score for report {eval_id}: {str(e)}")
-                
-                reports.append(report_data)
+                    logger.error(f"Error reading report metadata {meta_file}: {str(e)}")
             
             # Trier les rapports par date (du plus récent au plus ancien)
-            reports.sort(key=lambda x: x["creation_date"], reverse=True)
+            reports.sort(key=lambda x: x.get("creation_date", ""), reverse=True)
             
             return reports
             
@@ -614,26 +864,25 @@ class LLMEvaluationService:
             Optional[Dict[str, Any]]: Informations sur le rapport ou None s'il n'existe pas
         """
         try:
-            reports = await self.get_reports()
+            meta_path = self.frontend_data_dir / f"report_{report_id}.json"
             
-            # Chercher le rapport par ID
-            for report in reports:
-                if report["id"] == report_id:
-                    # Récupérer le contenu HTML du rapport principal
-                    html_report_path = report["report_files"].get("html")
-                    if html_report_path and os.path.exists(html_report_path):
-                        with open(html_report_path, "r", encoding="utf-8") as f:
-                            report["content"] = f.read()
-                    
-                    # Récupérer les données JSON du rapport si disponibles
-                    json_report_path = report["report_files"].get("json")
-                    if json_report_path and os.path.exists(json_report_path):
-                        with open(json_report_path, "r", encoding="utf-8") as f:
-                            report["data"] = json.load(f)
-                    
-                    return report
+            if not meta_path.exists():
+                return None
+                
+            with open(meta_path, "r", encoding="utf-8") as f:
+                report_info = json.load(f)
             
-            return None
+            # Récupérer le contenu des fichiers de rapport
+            for format_type, file_path in report_info.get("report_files", {}).items():
+                if os.path.exists(file_path):
+                    if format_type == "html":
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            report_info["content"] = f.read()
+                    elif format_type == "json":
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            report_info["data"] = json.load(f)
+            
+            return report_info
             
         except Exception as e:
             logger.error(f"Error getting report {report_id}: {str(e)}")
@@ -645,25 +894,24 @@ class LLMEvaluationService:
         
         Args:
             report_id: ID du rapport
-            format: Format du rapport (html, pdf, csv, json)
+            format: Format du rapport (html, json, csv)
             
         Returns:
             Optional[str]: Chemin du fichier à télécharger ou None s'il n'existe pas
         """
         try:
-            reports = await self.get_reports()
+            report_info = await self.get_report(report_id)
             
-            # Chercher le rapport par ID
-            for report in reports:
-                if report["id"] == report_id:
-                    # Récupérer le fichier selon le format demandé
-                    report_path = report["report_files"].get(format)
-                    if report_path and os.path.exists(report_path):
-                        return report_path
-                    
-                    return None
+            if not report_info or "report_files" not in report_info:
+                return None
             
-            return None
+            # Récupérer le chemin du fichier pour le format demandé
+            file_path = report_info["report_files"].get(format)
+            
+            if not file_path or not os.path.exists(file_path):
+                return None
+            
+            return file_path
             
         except Exception as e:
             logger.error(f"Error downloading report {report_id}: {str(e)}")
@@ -776,3 +1024,18 @@ class LLMEvaluationService:
         except Exception as e:
             logger.error(f"Error getting LLM statistics: {str(e)}")
             raise
+    
+    async def _save_json_file(self, file_path: Path, data: Dict) -> None:
+        """
+        Sauvegarde des données au format JSON de façon asynchrone
+        
+        Args:
+            file_path: Chemin du fichier
+            data: Données à sauvegarder
+        """
+        def write_json():
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4, sort_keys=True)
+        
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, write_json)
