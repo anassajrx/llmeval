@@ -1,0 +1,103 @@
+{
+    "evaluation": {
+        "advanced_criteria": null,
+        "completed_qcm": 2,
+        "document_paths": [
+            "C:\\Users\\ABENGMAH\\OneDrive - Deloitte (O365D)\\Desktop\\Projects\\new_workspace\\llm_evaluation_system\\data\\input\\585efe58-a572-4470-be37-bfbf3f128910.pdf"
+        ],
+        "documents": [
+            "585efe58-a572-4470-be37-bfbf3f128910"
+        ],
+        "end_time": null,
+        "id": "b8e9aa85-9446-478f-bfba-99fb96f4968c",
+        "progress": 40.0,
+        "qcm_list": [
+            {
+                "choices": {
+                    "A": "Utiliser des questions QCM basées sur des sources d'information publiques et largement diffusées avant le 6 février 2025, en vérifiant que le modèle ne s'appuie pas sur des informations postérieures à cette date pour répondre.",
+                    "B": "Utiliser des questions QCM basées sur un mélange de sources d'information publiques antérieures et postérieures au 6 février 2025, en évaluant la capacité du modèle à distinguer les informations pertinentes et à les contextualiser correctement.",
+                    "C": "Utiliser des questions QCM basées principalement sur des sources d'information postérieures au 6 février 2025, afin de tester la capacité du modèle à intégrer des informations récentes et à les restituer avec précision.",
+                    "D": "Utiliser des questions QCM basées sur des sources d'information internes à la Commission de Régulation de l'Intelligence Artificielle, disponibles uniquement après le 6 février 2025, pour évaluer la capacité du modèle à accéder à des informations privilégiées."
+                },
+                "correct_answer": "A",
+                "criterion": "Integrity",
+                "difficulty": "complex",
+                "explanation": "L'option A est la plus rigoureuse car elle permet de s'assurer que le modèle ne 'triche' pas en utilisant des informations futures (par rapport à la date du document de référence) pour répondre aux questions. L'intégrité, dans ce contexte, implique que le modèle se base sur les connaissances disponibles au moment où le document de référence a été publié. Les autres options introduisent des biais potentiels ou testent des aspects différents de la factual_accuracy.",
+                "id": "7e4f9083-d4f9-43ae-b116-febefcc1dd52",
+                "points": 5,
+                "question": "Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, quelle approche serait la plus rigoureuse pour évaluer la factual_accuracy des réponses du modèle concernant des événements survenus entre le 1er janvier 2025 et le 15 février 2025 ?",
+                "type": "factual_accuracy"
+            },
+            {
+                "choices": {
+                    "A": "La cohérence globale est compromise car l'omission des arguments de la défense perturbe la compréhension du raisonnement juridique complet, rendant le résumé incomplet et potentiellement biaisé.",
+                    "B": "La cohérence thématique est compromise car le LLM se concentre sur les faits et la décision, négligeant l'argumentation juridique qui constitue un thème central de la décision.",
+                    "C": "La cohérence locale est compromise car chaque phrase du résumé est factuellement correcte, mais l'absence des arguments de la défense crée des sauts logiques entre les différentes parties du résumé.",
+                    "D": "La cohérence pragmatique est compromise car le résumé, bien que factuellement correct, ne répond pas aux attentes d'un utilisateur cherchant à comprendre le raisonnement juridique sous-jacent à la décision."
+                },
+                "correct_answer": "A",
+                "criterion": "Coherence",
+                "difficulty": "complex-reasoning",
+                "explanation": "La cohérence globale, ou macro-cohérence, se réfère à la manière dont les différentes parties d'un texte s'articulent pour former un tout cohérent et significatif. Dans ce cas, l'omission des arguments de la défense perturbe la compréhension du raisonnement juridique complet, rendant le résumé incomplet et potentiellement biaisé. Bien que les autres options puissent présenter des aspects de cohérence affectés, la cohérence globale est la plus directement compromise car elle affecte la capacité du lecteur à comprendre la logique de la décision dans son ensemble.",
+                "id": "85c6cfef-7763-4ee7-8013-aa1f31855a53",
+                "points": 5,
+                "question": "Un LLM est utilisé pour générer des résumés de décisions de justice. Lors d'un test basé sur des QCM, on constate que le LLM inclut systématiquement des informations factuelles exactes et pertinentes, mais omet fréquemment les arguments clés de la défense, même lorsque ceux-ci sont essentiels à la compréhension de la logique de la décision. Quel aspect de la cohérence (logical_flow) est le plus compromis dans ce scénario, compte tenu du contexte d'évaluation des LLM dans le domaine juridique ?",
+                "type": "logical_flow"
+            }
+        ],
+        "selected_criteria": [
+            "Integrity",
+            "Coherence"
+        ],
+        "start_time": "2025-03-04T15:07:39.594849",
+        "status": "running",
+        "test_mode": true,
+        "total_qcm": 5
+    },
+    "results": {
+        "advanced_metrics": {},
+        "advanced_testing_info": {
+            "criteria_tested": [],
+            "enabled": false
+        },
+        "criteria_scores": {
+            "Coherence": {
+                "advanced_metrics": {},
+                "questions_count": 1,
+                "score": 0,
+                "success_count": 1,
+                "total": 5
+            },
+            "Integrity": {
+                "advanced_metrics": {},
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            }
+        },
+        "details": [
+            {
+                "correct_answer": "A",
+                "criterion": "Integrity",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, quelle approche serait la plus rigoureuse pour évaluer la factual_accuracy des réponses du modèle concernant des événements survenus entre le 1er janvier 2025 et le 15 février 2025 ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "A",
+                "criterion": "Coherence",
+                "max_points": 5,
+                "model_answer": "D",
+                "question": "Un LLM est utilisé pour générer des résumés de décisions de justice. Lors d'un test basé sur des QCM, on constate que le LLM inclut systématiquement des informations factuelles exactes et pertinentes, mais omet fréquemment les arguments clés de la défense, même lorsque ceux-ci sont essentiels à la compréhension de la logique de la décision. Quel aspect de la cohérence (logical_flow) est le plus compromis dans ce scénario, compte tenu du contexte d'évaluation des LLM dans le domaine juridique ?",
+                "score": 0,
+                "status": "success"
+            }
+        ],
+        "error_count": 0,
+        "success_rate": 100.0,
+        "total_score": 50.0
+    }
+}

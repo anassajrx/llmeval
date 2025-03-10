@@ -202,6 +202,11 @@ const WebSocketManager = {
      */
     connect: function(channel, onMessageCallback) {
         if (this.connections[channel]) {
+            // Ne pas fermer la connexion si elle existe déjà - simplement réutiliser
+            if (this.connections[channel].readyState === WebSocket.OPEN) {
+                console.log(`WebSocket already connected: ${channel}`);
+                return;
+            }
             this.connections[channel].close();
         }
         

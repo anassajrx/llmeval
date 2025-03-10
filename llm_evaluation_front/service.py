@@ -10,6 +10,8 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 from fastapi import UploadFile
+import asyncio
+from typing import List, Dict, Any
 
 # Ajout du chemin du backend au sys.path
 backend_path = Path(r"C:\Users\ABENGMAH\OneDrive - Deloitte (O365D)\Desktop\Projects\new_workspace\llm_evaluation_system")
@@ -204,12 +206,17 @@ class LLMEvaluationService:
             logger.error(f"Error deleting document {document_id}: {str(e)}")
             raise
     
-    async def start_evaluation(self, document_ids: List[str], test_mode: bool = False) -> str:
+    async def start_evaluation(self, document_ids: List[str], 
+                        selected_criteria: List[str] = None,
+                        advanced_criteria: List[str] = None,
+                        test_mode: bool = False) -> str:
         """
         Démarre une nouvelle évaluation
         
         Args:
             document_ids: Liste des IDs de documents à évaluer
+            selected_criteria: Critères sélectionnés pour la génération de QCM
+            advanced_criteria: Critères pour les tests avancés d'évaluation
             test_mode: Si True, exécute l'évaluation en mode test
             
         Returns:
@@ -235,6 +242,8 @@ class LLMEvaluationService:
                 "documents": document_ids,
                 "document_paths": documents,
                 "test_mode": test_mode,
+                "selected_criteria": selected_criteria,
+                "advanced_criteria": advanced_criteria,
                 "status": "pending",
                 "progress": 0.0,
                 "start_time": datetime.now().isoformat(),
@@ -256,21 +265,22 @@ class LLMEvaluationService:
         except Exception as e:
             logger.error(f"Error starting evaluation: {str(e)}")
             raise
+            
+        except Exception as e:
+            logger.error(f"Error starting evaluation: {str(e)}")
+            raise
     
     async def run_evaluation_task(self, evaluation_id: str, document_ids: List[str], 
-                                 test_mode: bool, manager) -> None:
+                           test_mode: bool, manager, selected_criteria: List[str] = None,
+                           advanced_criteria: List[str] = None) -> None:
         """
         Exécute l'évaluation en arrière-plan et met à jour le statut
-        
-        Args:
-            evaluation_id: ID de l'évaluation
-            document_ids: Liste des IDs de documents
-            test_mode: Mode de test
-            manager: Gestionnaire de connexions WebSocket
         """
         try:
             # Mettre à jour le statut
             self.evaluations[evaluation_id]["status"] = "running"
+            self.evaluations[evaluation_id]["selected_criteria"] = selected_criteria
+            self.evaluations[evaluation_id]["advanced_criteria"] = advanced_criteria
             await self._update_evaluation_status(evaluation_id, manager)
             
             # Récupérer les chemins des documents
@@ -279,14 +289,46 @@ class LLMEvaluationService:
             # Traiter les documents
             chunks = self.evaluation_system.process_documents(document_paths)
             
+            # Cédez régulièrement le contrôle pour permettre la navigation
+            await asyncio.sleep(0.1)
+            
             # Générer et stocker les embeddings
             self.evaluation_system.generate_and_store_embeddings(chunks)
             
-            # Générer les QCM (avec notifications pour les mises à jour)
-            qcm_list = await self._generate_qcm_with_updates(evaluation_id, chunks[0], test_mode, manager)
+            # Cédez régulièrement le contrôle pour permettre la navigation
+            await asyncio.sleep(0.1)
             
-            # Évaluer le modèle
-            evaluation_results = self.evaluation_system.evaluate_model(qcm_list)
+            # Générer les QCM avec les critères sélectionnés
+            qcm_list = await self._generate_qcm_with_updates(
+                evaluation_id, 
+                chunks[0], 
+                test_mode, 
+                manager, 
+                selected_criteria
+            )
+            # Notification de changement de phase - AJOUTEZ CE BLOC ICI
+            try:
+                await manager.broadcast({
+                    "type": "phase_change",
+                    "evaluation_id": evaluation_id,
+                    "previous_phase": "generation",
+                    "new_phase": "evaluation",
+                    "timestamp": datetime.now().isoformat()
+                }, "notifications")
+            except Exception as e:
+                logger.warning(f"Non-critical: Error broadcasting phase change: {str(e)}")
+            
+            # Évaluer le modèle avec les critères avancés sélectionnés
+             # Évaluer le modèle avec les critères avancés sélectionnés - PARTIE NON NAVIGABLE
+            # Diviser l'évaluation en tâches plus petites pour permettre la navigation
+            
+            evaluation_results = await self._evaluate_model_with_updates(
+                evaluation_id,
+                qcm_list,
+                advanced_criteria,
+                manager
+            )
+           
             
             # Générer les rapports
             report_paths = await self.generate_reports(evaluation_id, evaluation_results)
@@ -301,7 +343,7 @@ class LLMEvaluationService:
             # Sauvegarder les métadonnées finales
             await self._save_evaluation_metadata(evaluation_id)
             
-            # Notification finale avec gestion d'erreur
+            # Notification finale
             try:
                 await manager.broadcast({
                     "type": "evaluation_completed",
@@ -324,7 +366,7 @@ class LLMEvaluationService:
                 # Sauvegarder les métadonnées
                 await self._save_evaluation_metadata(evaluation_id)
                 
-                # Notification d'erreur avec gestion d'erreur
+                # Notification d'erreur
                 try:
                     await manager.broadcast({
                         "type": "evaluation_error",
@@ -338,13 +380,11 @@ class LLMEvaluationService:
     async def _update_evaluation_status(self, evaluation_id: str, manager) -> None:
         """
         Met à jour le statut de l'évaluation via WebSocket
-        
-        Args:
-            evaluation_id: ID de l'évaluation
-            manager: Gestionnaire de connexions WebSocket
         """
         if evaluation_id in self.evaluations:
             eval_info = self.evaluations[evaluation_id]
+            
+            # Mise à jour standard
             status_update = {
                 "type": "evaluation_status",
                 "evaluation_id": evaluation_id,
@@ -355,8 +395,20 @@ class LLMEvaluationService:
                 "timestamp": datetime.now().isoformat()
             }
             
+            # Mise à jour détaillée de la progression
+            progress_update = {
+                "type": "progress_update",
+                "evaluation_id": evaluation_id,
+                "progress": eval_info["progress"],
+                "total_qcm": eval_info["total_qcm"],
+                "completed_qcm": eval_info["completed_qcm"],
+                "timestamp": datetime.now().isoformat()
+            }
+            
             try:
+                # Envoyer sur les deux canaux
                 await manager.broadcast(status_update, "evaluation_status")
+                await manager.broadcast(progress_update, "progress_updates")
             except Exception as e:
                 logger.warning(f"Non-critical: Error updating evaluation status: {str(e)}")
     
@@ -380,32 +432,38 @@ class LLMEvaluationService:
             logger.info(f"Saved evaluation metadata for {evaluation_id}")
     
     async def _generate_qcm_with_updates(self, evaluation_id: str, context: str, 
-                                       test_mode: bool, manager) -> List[Dict[str, Any]]:
+                                  test_mode: bool, manager, selected_criteria: List[str] = None) -> List[Dict[str, Any]]:
         """
         Génère les QCM avec des mises à jour en temps réel via WebSocket
-        
-        Args:
-            evaluation_id: ID de l'évaluation
-            context: Contexte pour la génération des QCM
-            test_mode: Mode de test
-            manager: Gestionnaire de connexions WebSocket
-            
-        Returns:
-            List[Dict[str, Any]]: Liste des QCM générés
         """
         try:
             # Initialiser la liste des QCM
             qcm_list = []
             
             # Estimer le nombre total de QCM qui seront générés
-            total_qcm = 5 if test_mode else 25  # Estimation très simplifiée
+            total_qcm = self._estimate_qcm_count(selected_criteria, test_mode)
             self.evaluations[evaluation_id]["total_qcm"] = total_qcm
             
-            # Générer les QCM
-            generated_qcm = self.evaluation_system.qcm_generator.generate_qcm(context, test_mode)
+            # Notification du début de génération
+            try:
+                await manager.broadcast({
+                    "type": "qcm_generation_started",
+                    "evaluation_id": evaluation_id,
+                    "criteria": selected_criteria,
+                    "estimated_count": total_qcm,
+                    "timestamp": datetime.now().isoformat()
+                }, "notifications")
+            except Exception as e:
+                logger.warning(f"Non-critical: Error broadcasting generation start: {str(e)}")
             
-            # Traiter chaque QCM généré
-            for idx, qcm in enumerate(generated_qcm):
+            # Paramètres de génération
+            num_generic = 5 if test_mode else 30
+            qcm_counter = 0
+                
+            # Fonction pour traiter un QCM et mettre à jour la progression
+            async def process_qcm(qcm):
+                nonlocal qcm_counter
+                
                 # Ajouter un ID unique au QCM
                 qcm["id"] = str(uuid.uuid4())
                 
@@ -414,28 +472,65 @@ class LLMEvaluationService:
                 self.evaluations[evaluation_id]["qcm_list"].append(qcm)
                 self.evaluations[evaluation_id]["completed_qcm"] += 1
                 
-                # Calculer la progression
-                progress = ((idx + 1) / total_qcm) * 100
-                self.evaluations[evaluation_id]["progress"] = min(progress, 99.0)  # Max 99% jusqu'à la fin
+                # Incrémenter le compteur et calculer la progression
+                qcm_counter += 1
+                progress = (qcm_counter / total_qcm) * 100
+                self.evaluations[evaluation_id]["progress"] = min(progress, 99.0)
                 
-                # Envoyer la mise à jour QCM
+                # Diffuser la mise à jour
                 try:
                     await manager.broadcast({
                         "type": "qcm_generated",
                         "evaluation_id": evaluation_id,
                         "qcm": qcm,
+                        "progress": progress,
                         "timestamp": datetime.now().isoformat()
                     }, "qcm_updates")
                 except Exception as e:
                     logger.warning(f"Non-critical: Error broadcasting QCM update: {str(e)}")
                 
-                # Mettre à jour le statut de l'évaluation
+                # Mettre à jour le statut
                 await self._update_evaluation_status(evaluation_id, manager)
                 
-                # Attendre un court instant pour simuler le temps de génération
-                # et permettre aux clients de voir la progression
-                await asyncio.sleep(0.2)
+                # Pause courte pour permettre l'interaction avec l'interface
+                await asyncio.sleep(0.1)
                 
+            # Générer et traiter les QCM de manière asynchrone
+            if not selected_criteria:
+                # Mode QCM générique
+                for i in range(num_generic):
+                    # Générer un QCM générique de manière asynchrone
+                    qcm = await asyncio.to_thread(
+                        self.evaluation_system.qcm_generator.generate_single_generic_qcm,
+                        context
+                    )
+                    
+                    if qcm:
+                        await process_qcm(qcm)
+            else:
+                # Mode critères spécifiques
+                for criterion in selected_criteria:
+                    if criterion in self.evaluation_system.qcm_generator.criteria:
+                        criterion_details = self.evaluation_system.qcm_generator.criteria[criterion]
+                        
+                        # Déterminer les types et niveaux de difficulté à utiliser
+                        types_to_use = criterion_details["types"][:1] if test_mode else criterion_details["types"]
+                        difficulties_to_use = criterion_details["difficulty_levels"][:1] if test_mode else criterion_details["difficulty_levels"]
+                        
+                        for type_category in types_to_use:
+                            for difficulty in difficulties_to_use:
+                                # Générer un QCM spécifique de manière asynchrone
+                                qcm = await asyncio.to_thread(
+                                    self.evaluation_system.qcm_generator.generate_specific_qcm,
+                                    context,
+                                    criterion,
+                                    type_category,
+                                    difficulty
+                                )
+                                
+                                if qcm:
+                                    await process_qcm(qcm)
+            
             # Mettre à jour les métadonnées
             await self._save_evaluation_metadata(evaluation_id)
             
@@ -444,6 +539,92 @@ class LLMEvaluationService:
         except Exception as e:
             logger.error(f"Error generating QCM: {str(e)}")
             raise
+
+    async def _generate_single_qcm(self, context: str, params: Dict = None, test_mode: bool = False) -> Dict[str, Any]:
+        """
+        Génère un seul QCM
+        
+        Args:
+            context: Contexte pour la génération
+            params: Paramètres spécifiques (critère, type, difficulté)
+            test_mode: Mode test
+            
+        Returns:
+            Dict[str, Any]: QCM généré ou None en cas d'erreur
+        """
+        try:
+            if params:
+                # Utilise la fonction de génération de QCM du système d'évaluation 
+                # avec les paramètres spécifiés
+                return await asyncio.to_thread(
+                    self.evaluation_system.qcm_generator.generate_specific_qcm,
+                    context,
+                    params["criterion"],
+                    params["type"],
+                    params["difficulty"]
+                )
+            else:
+                # Utilise la fonction de génération de QCM générique
+                return await asyncio.to_thread(
+                    self.evaluation_system.qcm_generator.generate_single_generic_qcm,
+                    context
+                )
+        except Exception as e:
+            logger.error(f"Error generating single QCM: {str(e)}")
+            
+            # Créer un QCM factice en cas d'erreur
+            criterion = params["criterion"] if params else "Generic"
+            return {
+                'question': f"Question sur {criterion} (échec de génération)",
+                'choices': {
+                    'A': "Option A",
+                    'B': "Option B", 
+                    'C': "Option C",
+                    'D': "Option D"
+                },
+                'correct_answer': 'A',
+                'points': 5,
+                'explanation': "QCM factice créé suite à une erreur de génération",
+                'criterion': criterion,
+                'type': params["type"] if params else "standard",
+                'difficulty': params["difficulty"] if params else "medium",
+                'is_fake': True
+            }
+
+    def _estimate_qcm_count(self, selected_criteria: List[str], test_mode: bool) -> int:
+        """
+        Estime le nombre de QCM qui seront générés
+        
+        Args:
+            selected_criteria: Critères sélectionnés
+            test_mode: Mode test
+                
+        Returns:
+            int: Nombre estimé de QCM
+        """
+        if test_mode:
+            if not selected_criteria:
+                return 5  # Mode test générique : 5 QCM
+            
+            # Mode test avec critères: 1 QCM par type et niveau de difficulté
+            total = 0
+            for criterion in selected_criteria:
+                if criterion in self.evaluation_system.qcm_generator.criteria:
+                    # En mode test, un seul type et niveau de difficulté par critère
+                    total += 1  # (1 type × 1 difficulté)
+            return max(total, 1)  # Au moins 1 QCM
+        else:
+            if not selected_criteria:
+                return 30  # Mode normal générique : 30 QCM
+            
+            # Mode normal avec critères: tous les types et niveaux de difficulté
+            total = 0
+            for criterion in selected_criteria:
+                if criterion in self.evaluation_system.qcm_generator.criteria:
+                    # Nombre de types × nombre de niveaux de difficulté
+                    criterion_details = self.evaluation_system.qcm_generator.criteria[criterion]
+                    total += len(criterion_details["types"]) * len(criterion_details["difficulty_levels"])
+            return max(total, 1)  # Au moins 1 QCM
     
     async def get_evaluations(self) -> List[Dict[str, Any]]:
         """
@@ -1039,3 +1220,211 @@ class LLMEvaluationService:
         
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, write_json)
+
+    async def _evaluate_model_with_updates(self, evaluation_id: str, qcm_list: List[Dict[str, Any]], 
+                                    advanced_criteria: List[str], manager) -> Dict[str, Any]:
+        """
+        Évalue le modèle avec des mises à jour en temps réel via WebSocket
+        """
+        try:
+            # Initialiser les résultats
+            results = {
+                'total_score': 0,
+                'criteria_scores': {},
+                'advanced_metrics': {},
+                'details': [],
+                'success_rate': 0,
+                'error_count': 0
+            }
+            
+            # Notification du début de l'évaluation
+            try:
+                await manager.broadcast({
+                    "type": "evaluation_started",
+                    "evaluation_id": evaluation_id,
+                    "total_qcm": len(qcm_list),
+                    "timestamp": datetime.now().isoformat()
+                }, "evaluation_status")
+            except Exception as e:
+                logger.warning(f"Non-critical: Error broadcasting evaluation start: {str(e)}")
+            
+            # Diviser les QCM en lots plus petits pour éviter de bloquer trop longtemps
+            batch_size = 5
+            batches = [qcm_list[i:i + batch_size] for i in range(0, len(qcm_list), batch_size)]
+            
+            # Traiter chaque lot et mettre à jour la progression
+            for batch_idx, batch in enumerate(batches):
+                # Mise à jour de la progression
+                progress = (batch_idx / len(batches)) * 100
+                self.evaluations[evaluation_id]["progress"] = min(progress, 99.0)
+                
+                # Mettre à jour le statut
+                await self._update_evaluation_status(evaluation_id, manager)
+                
+                # Traiter le lot de manière asynchrone
+                batch_results = await self._process_evaluation_batch(batch, advanced_criteria)
+                
+                # Fusionner les résultats
+                self._merge_evaluation_results(results, batch_results)
+                
+                # Notifier l'avancement
+                # Modifiez cette partie dans _evaluate_model_with_updates
+                try:
+                    await manager.broadcast({
+                        "type": "evaluation_batch_completed",
+                        "evaluation_id": evaluation_id,
+                        "batch": batch_idx + 1,
+                        "total_batches": len(batches),
+                        "progress": progress,
+                        "timestamp": datetime.now().isoformat()
+                    }, "evaluation_status")  # Assurez-vous que c'est bien "evaluation_status"
+                except Exception as e:
+                    logger.warning(f"Non-critical: Error broadcasting batch completion: {str(e)}")
+                
+                # Permettre aux autres tâches de s'exécuter (notamment la navigation)
+                await asyncio.sleep(0.2)
+            
+            # Calculer les métriques finales
+            self._calculate_final_metrics(results, len(qcm_list))
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error evaluating model: {str(e)}")
+            raise
+    def _calculate_final_metrics(self, results: Dict, total_qcm: int) -> None:
+        """
+        Calcule les métriques finales
+        
+        Args:
+            results (Dict): Résultats à finaliser
+            total_qcm (int): Nombre total de QCM
+        """
+        successful_tests = total_qcm - results['error_count']
+        results['success_rate'] = (successful_tests / total_qcm) * 100 if total_qcm > 0 else 0
+
+        total_score = 0
+        total_possible = 0
+        for criterion_stats in results['criteria_scores'].values():
+            total_score += criterion_stats['score']
+            total_possible += criterion_stats['total']
+
+        results['total_score'] = (total_score / total_possible * 100) if total_possible > 0 else 0
+
+    async def _process_evaluation_batch(self, batch: List[Dict[str, Any]], advanced_criteria: List[str]) -> Dict[str, Any]:
+        """
+        Traite un lot de QCM pour l'évaluation
+        """
+        batch_results = {
+            'details': [],
+            'error_count': 0
+        }
+        
+        for qcm in batch:
+            try:
+                # Utiliser to_thread pour exécuter l'évaluation en arrière-plan
+                # et éviter de bloquer la boucle d'événements asyncio
+                standard_result = await asyncio.to_thread(
+                    self._evaluate_single_qcm,
+                    qcm
+                )
+                
+                if standard_result['status'] == 'success':
+                    # Pour les tests avancés, vérifier si le critère est sélectionné
+                    advanced_result = {}
+                    if advanced_criteria and qcm['criterion'] in advanced_criteria:
+                        advanced_result = await asyncio.to_thread(
+                            self._run_advanced_tests,
+                            qcm
+                        )
+                    
+                    batch_results['details'].append({**standard_result, 'advanced': advanced_result})
+                else:
+                    batch_results['error_count'] += 1
+                    batch_results['details'].append(standard_result)
+                
+                # Petite pause pour d'autres tâches
+                await asyncio.sleep(0.01)
+                
+            except Exception as e:
+                logger.error(f"Error processing QCM: {str(e)}")
+                batch_results['error_count'] += 1
+        
+        return batch_results
+
+    def _evaluate_single_qcm(self, qcm: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Évalue un seul QCM (version synchrone pour to_thread)
+        """
+        # Utilisation du cache si disponible
+        cached_response = self.evaluation_system.llm_evaluator.request_queue.get_from_cache(qcm, 'standard')
+        if cached_response:
+            response = cached_response
+        else:
+            # Demande à l'assistant juridique
+            response = self.evaluation_system.llm_evaluator.legal_assistant.ask_question(qcm, 'standard')
+            self.evaluation_system.llm_evaluator.request_queue.add_to_cache(qcm, 'standard', response)
+        
+        if response != 'ERROR':
+            correct = response == qcm['correct_answer']
+            return {
+                'criterion': qcm['criterion'],
+                'question': qcm['question'],
+                'model_answer': response,
+                'correct_answer': qcm['correct_answer'],
+                'score': qcm['points'] if correct else 0,
+                'max_points': qcm['points'],
+                'status': 'success'
+            }
+        
+        return {
+            'criterion': qcm['criterion'],
+            'question': qcm['question'],
+            'model_answer': 'ERROR',
+            'correct_answer': qcm['correct_answer'],
+            'score': 0,
+            'max_points': qcm['points'],
+            'status': 'error'
+        }
+
+    def _run_advanced_tests(self, qcm: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Exécute les tests avancés pour un QCM (version synchrone pour to_thread)
+        """
+        return self.evaluation_system.llm_evaluator._run_advanced_tests(qcm)
+
+    def _merge_evaluation_results(self, results: Dict[str, Any], batch_results: Dict[str, Any]) -> None:
+        """
+        Fusionne les résultats de lot dans les résultats globaux
+        """
+        # Ajouter les détails
+        results['details'].extend(batch_results['details'])
+        
+        # Mettre à jour le compteur d'erreurs
+        results['error_count'] += batch_results['error_count']
+        
+        # Mettre à jour les statistiques par critère
+        for detail in batch_results['details']:
+            criterion = detail['criterion']
+            
+            if criterion not in results['criteria_scores']:
+                results['criteria_scores'][criterion] = {
+                    'score': 0,
+                    'total': 0,
+                    'questions_count': 0,
+                    'success_count': 0,
+                    'advanced_metrics': {}
+                }
+            
+            criteria_stats = results['criteria_scores'][criterion]
+            
+            if detail['status'] == 'success':
+                criteria_stats['success_count'] += 1
+                criteria_stats['score'] += detail['score']
+            
+            criteria_stats['total'] += detail['max_points']
+            criteria_stats['questions_count'] += 1
+            
+            # Fusionner les métriques avancées si présentes
+            if 'advanced' in detail and detail['advanced']:
+                criteria_stats['advanced_metrics'].update(detail['advanced'])

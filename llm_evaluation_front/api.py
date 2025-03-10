@@ -30,10 +30,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger("llm_evaluation_api")
 
-# Modèles Pydantic
+# Modèles Pydantic mis à jour
 class EvaluationRequest(BaseModel):
     document_ids: List[str]
     test_mode: bool = False
+    selected_criteria: Optional[List[str]] = None
+    advanced_criteria: Optional[List[str]] = None
 
 # Classe pour gérer les WebSockets
 class ConnectionManager:
@@ -164,14 +166,62 @@ async def delete_document(document_id: str):
 @app.post("/api/evaluations/start")
 async def start_evaluation(request: EvaluationRequest, background_tasks: BackgroundTasks):
     try:
-        evaluation_id = await service.start_evaluation(request.document_ids, request.test_mode)
+        evaluation_id = await service.start_evaluation(
+            request.document_ids, 
+            selected_criteria=request.selected_criteria,
+            advanced_criteria=request.advanced_criteria, 
+            test_mode=request.test_mode
+        )
+        
         # Démarrer l'évaluation en arrière-plan
-        background_tasks.add_task(service.run_evaluation_task, evaluation_id, request.document_ids, request.test_mode, manager)
-        return JSONResponse(content={"evaluation_id": evaluation_id, "status": "started"})
+        background_tasks.add_task(
+            service.run_evaluation_task, 
+            evaluation_id, 
+            request.document_ids, 
+            request.test_mode, 
+            manager, 
+            request.selected_criteria,
+            request.advanced_criteria
+        )
+        
+        return JSONResponse(content={
+            "evaluation_id": evaluation_id, 
+            "status": "started",
+            "selected_criteria": request.selected_criteria,
+            "advanced_criteria": request.advanced_criteria
+        })
     except Exception as e:
         logger.error(f"Error starting evaluation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to start evaluation: {str(e)}")
 
+
+
+#########
+# Nouvelle route pour obtenir les critères disponibles
+@app.get("/api/criteria")
+async def get_available_criteria():
+    try:
+        criteria = {
+            "available_criteria": [
+                "Bias", 
+                "Integrity", 
+                "Relevance", 
+                "Legal_Compliance", 
+                "Coherence"
+            ],
+            "descriptions": {
+                "Bias": "Évalue la résistance aux biais de genre, culturels et socio-économiques",
+                "Integrity": "Évalue l'exactitude factuelle et la cohérence logique des réponses",
+                "Relevance": "Évalue la pertinence contextuelle et temporelle des réponses",
+                "Legal_Compliance": "Évalue le respect des normes juridiques et réglementaires",
+                "Coherence": "Évalue la structure logique et la cohérence des arguments"
+            }
+        }
+        return JSONResponse(content=criteria)
+    except Exception as e:
+        logger.error(f"Error getting criteria: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve criteria: {str(e)}")
+#############
 @app.get("/api/evaluations")
 async def get_evaluations():
     try:
@@ -311,6 +361,17 @@ async def websocket_notifications(websocket: WebSocket):
             await asyncio.sleep(10)
     except WebSocketDisconnect:
         manager.disconnect(websocket, "notifications")
+
+
+
+@app.websocket("/ws/progress-updates")
+async def websocket_progress_updates(websocket: WebSocket):
+    await manager.connect(websocket, "progress_updates")
+    try:
+        while True:
+            await asyncio.sleep(10)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "progress_updates")
 
 # Route pour la santé de l'API
 @app.get("/health")

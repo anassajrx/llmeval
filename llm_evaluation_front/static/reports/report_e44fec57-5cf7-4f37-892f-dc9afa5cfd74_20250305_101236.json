@@ -1,0 +1,163 @@
+{
+    "evaluation": {
+        "advanced_criteria": [
+            "Bias"
+        ],
+        "completed_qcm": 5,
+        "document_paths": [
+            "C:\\Users\\ABENGMAH\\OneDrive - Deloitte (O365D)\\Desktop\\Projects\\new_workspace\\llm_evaluation_system\\data\\input\\d05a869d-05ff-409a-8d4b-8472581c6c50.pdf"
+        ],
+        "documents": [
+            "d05a869d-05ff-409a-8d4b-8472581c6c50"
+        ],
+        "end_time": null,
+        "id": "e44fec57-5cf7-4f37-892f-dc9afa5cfd74",
+        "progress": 99.0,
+        "qcm_list": [
+            {
+                "choices": {
+                    "A": "Le passager peut échanger son billet gratuitement une seule fois avant le départ de son train initial. S'il choisit d'annuler son voyage avant le départ, il recevra un remboursement complet.",
+                    "B": "Le passager peut échanger son billet gratuitement un nombre illimité de fois avant le départ de son train initial. S'il choisit d'annuler son voyage avant le départ, il recevra un remboursement partiel avec une retenue de 50%.",
+                    "C": "Le passager peut échanger son billet gratuitement une seule fois avant le départ de son train initial. S'il choisit d'annuler son voyage avant le départ, il recevra un remboursement partiel avec une retenue de 50%.",
+                    "D": "Le passager ne peut pas échanger son billet. S'il choisit d'annuler son voyage avant le départ, il recevra un remboursement partiel avec une retenue de 50%."
+                },
+                "correct_answer": "C",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Le contexte indique clairement que l'échange est gratuit une seule fois avant le départ et qu'un remboursement est possible avec une retenue de 50% avant le départ. Les autres options présentent des inexactitudes concernant le nombre d'échanges gratuits ou le montant du remboursement.",
+                "id": "05f89cab-cec9-4a39-9ba3-8f9cbd068442",
+                "points": 5,
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des affirmations suivantes est la plus précise concernant ses options et les implications financières potentielles ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Demander un remboursement immédiat, même avec la retenue de 50%, car cela lui permet de récupérer une partie de son investissement initial et de planifier un nouveau voyage plus tard.",
+                    "B": "Échanger son billet gratuitement une fois pour un autre voyage, même si le nouveau voyage ne correspond pas parfaitement à ses besoins initiaux, car cela évite toute perte financière immédiate.",
+                    "C": "Tenter de revendre son billet à un tiers, en espérant récupérer une somme supérieure à 50% du prix initial, bien que cela ne soit pas explicitement autorisé par les conditions de vente.",
+                    "D": "Attendre le départ du train initial et ensuite demander un remboursement partiel, en espérant que les conditions après-départ soient plus favorables, bien que cela ne soit pas mentionné dans le texte."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "L'option B est la plus avantageuse car elle permet un échange gratuit avant le départ. Les autres options impliquent une perte financière (A), une action non autorisée (C) ou une spéculation non étayée par le texte (D). L'échange gratuit garantit la conservation de la valeur du billet, même si le voyage doit être adapté.",
+                "id": "74af1649-17b2-441d-b0e3-bc65527bde4a",
+                "points": 5,
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Demander un remboursement immédiat, même avec la retenue de 50%, car cela lui permet de récupérer une partie de son investissement initial et de planifier un nouveau voyage plus tard.",
+                    "B": "Échanger son billet gratuitement une fois pour un autre voyage, même si le nouveau voyage ne correspond pas parfaitement à ses besoins initiaux, car cela évite toute perte financière immédiate.",
+                    "C": "Tenter de revendre son billet à un tiers, en espérant récupérer une somme supérieure à 50% du prix initial, bien que cela ne soit pas explicitement autorisé par les conditions de vente.",
+                    "D": "Attendre le départ du train initial et ensuite demander un remboursement partiel, en espérant que les conditions après-départ soient plus favorables, bien que cela ne soit pas mentionné dans le texte."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "L'option B est la plus avantageuse car elle permet un échange gratuit avant le départ. Les autres options impliquent une perte financière (A), une action non autorisée (C) ou une spéculation non étayée par le texte (D). L'échange gratuit garantit la conservation de la valeur du billet, même si le voyage doit être adapté.",
+                "id": "a441d4ee-b0d5-42dd-9b81-4cab86a0fd90",
+                "points": 5,
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Le passager ne pourra pas se faire rembourser car il a déjà bénéficié d'un échange gratuit.",
+                    "B": "Le passager sera remboursé intégralement car l'annulation a lieu avant le départ du train.",
+                    "C": "Le passager sera remboursé avec une retenue de 50% du prix initial du billet, malgré l'échange gratuit déjà effectué.",
+                    "D": "Le passager pourra échanger son billet une seconde fois, mais ne pourra plus se faire rembourser."
+                },
+                "correct_answer": "C",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Le texte indique clairement que le billet est remboursable avec une retenue de 50% avant le départ du train. L'échange gratuit est une condition distincte et n'annule pas la possibilité de remboursement avec retenue. La question teste la compréhension de la priorité des conditions et l'impact de l'échange sur le remboursement.",
+                "id": "96a094a0-d210-43bc-9e49-425f9c00a6f4",
+                "points": 5,
+                "question": "Un passager souhaite modifier son billet Casa Oasis - Rabat Agdal. Il a déjà effectué un échange gratuit. Quel est le résultat le plus probable si le passager annule son voyage juste avant le départ du train, en se basant sur les conditions générales de vente présentées dans le texte?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Demander un remboursement immédiat, même avec la retenue de 50%, car cela lui permet de récupérer une partie de son investissement initial et de planifier un nouveau voyage plus tard.",
+                    "B": "Échanger son billet gratuitement une fois pour un autre voyage, même si le nouveau voyage ne correspond pas parfaitement à ses besoins initiaux, car cela évite toute perte financière immédiate.",
+                    "C": "Tenter de revendre son billet à un tiers, en espérant récupérer une somme supérieure à 50% du prix initial, bien que cela ne soit pas explicitement autorisé par les conditions de vente.",
+                    "D": "Attendre le départ du train initial et ensuite demander un remboursement partiel, en espérant que les conditions après-départ soient plus favorables, bien que cela ne soit pas mentionné dans le texte."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "L'option B est la plus avantageuse car elle permet un échange gratuit avant le départ. Les autres options impliquent une perte financière (A), une action non autorisée (C) ou une spéculation non étayée par le texte (D). L'échange gratuit garantit la conservation de la valeur du billet, même si le voyage doit être adapté.",
+                "id": "51021784-bc72-4064-9388-3979683b1961",
+                "points": 5,
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "type": "standard"
+            }
+        ],
+        "selected_criteria": null,
+        "start_time": "2025-03-05T10:11:34.602125",
+        "status": "running",
+        "test_mode": false,
+        "total_qcm": 5
+    },
+    "results": {
+        "advanced_metrics": {},
+        "advanced_testing_info": {
+            "criteria_tested": [
+                "Bias"
+            ],
+            "enabled": true
+        },
+        "criteria_scores": {
+            "Generic": {
+                "advanced_metrics": {},
+                "questions_count": 4,
+                "score": 20,
+                "success_count": 4,
+                "total": 20
+            }
+        },
+        "details": [
+            {
+                "correct_answer": "C",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "C",
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des affirmations suivantes est la plus précise concernant ses options et les implications financières potentielles ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Un passager ayant acheté un billet pour le trajet Casa Oasis - Rabat Agdal souhaite modifier son voyage. Compte tenu des conditions de vente, laquelle des situations suivantes est la plus avantageuse pour lui, en supposant qu'il souhaite minimiser ses pertes financières et qu'il est encore avant le départ de son train initial ?",
+                "score": 5,
+                "status": "success"
+            }
+        ],
+        "error_count": 1,
+        "success_rate": 80.0,
+        "total_score": 100.0
+    }
+}

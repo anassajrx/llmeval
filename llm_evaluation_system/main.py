@@ -62,9 +62,7 @@ class LLMEvaluationSystem:
             List[str]: Liste des chunks générés
         """
         logger.info(f"Processing {len(file_paths)} documents...")
-        #return self.doc_processor.process_documents(file_paths)
-        return self.doc_processor.process_documents(file_paths)[:1] 
-
+        return self.doc_processor.process_documents(file_paths)[:1]
 
     def generate_and_store_embeddings(self, chunks: List[str]):
         """
@@ -76,49 +74,38 @@ class LLMEvaluationSystem:
         logger.info("Generating and storing embeddings...")
         self.embeddings_manager.store_embeddings(chunks)
 
-    def generate_qcm(self, chunks: List[str]) -> List[Dict[str, Any]]:
+    def generate_qcm(self, context: str, selected_criteria: List[str] = None, test_mode: bool = False, num_generic_questions: int = 5) -> List[Dict[str, Any]]:
         """
-        Génère les QCM à partir des chunks
+        Génère les QCM à partir du contexte
         
         Args:
-            chunks: Liste des chunks de texte
+            context: Contexte pour la génération
+            selected_criteria: Critères sélectionnés pour les QCM (None = QCM génériques)
+            test_mode: Si True, génère un nombre réduit de QCM
+            num_generic_questions: Nombre de questions génériques si pas de critères
             
         Returns:
             List[Dict[str, Any]]: Liste des QCM générés
         """
-        logger.info("Generating QCM...")
-        qcm_list = []
-        
-        for i, chunk in enumerate(chunks, 1):
-            logger.info(f"Processing chunk {i}/{len(chunks)}...")
-            chunk_qcm = self.qcm_generator.generate_qcm(chunk)
-            qcm_list.extend(chunk_qcm)
-            
-        return qcm_list
+        logger.info(f"Generating QCM with {'generic mode' if not selected_criteria else 'selected criteria: ' + str(selected_criteria)}...")
+        return self.qcm_generator.generate_qcm(context, selected_criteria, test_mode, num_generic_questions)
 
-    def evaluate_model(self, qcm_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def evaluate_model(self, qcm_list: List[Dict[str, Any]], advanced_criteria: List[str] = None) -> Dict[str, Any]:
         """
         Évalue le modèle avec les QCM générés
         
         Args:
             qcm_list: Liste des QCM pour l'évaluation
+            advanced_criteria: Critères pour les tests avancés (None = tests standard uniquement)
             
         Returns:
             Dict[str, Any]: Résultats de l'évaluation
         """
         logger.info("Starting model evaluation...")
         
-        # Évaluation standard
-        evaluation_results = self.llm_evaluator.evaluate_model(qcm_list)
+        # Évaluation avec paramètres avancés si spécifiés
+        evaluation_results = self.llm_evaluator.evaluate_model(qcm_list, advanced_criteria=advanced_criteria)
         
-        # Tests avancés
-        advanced_results = {
-            'bias_resistance': self.advanced_testing.test_bias_resistance(qcm_list),
-            'integrity': self.advanced_testing.test_integrity_under_pressure(qcm_list),
-            'legal_compliance': self.advanced_testing.test_legal_compliance_edge_cases(qcm_list)
-        }
-        
-        evaluation_results['advanced_testing'] = advanced_results
         return evaluation_results
 
     def generate_reports(self, evaluation_results: Dict[str, Any]) -> Dict[str, str]:
@@ -134,13 +121,18 @@ class LLMEvaluationSystem:
         logger.info("Generating evaluation reports...")
         return self.report_generator.generate_report(evaluation_results)
 
-    def run_evaluation(self, input_files: List[str], test_mode: bool = False) -> Dict[str, Any]:
+    def run_evaluation(self, input_files: List[str], 
+                     selected_criteria: List[str] = None, 
+                     advanced_criteria: List[str] = None,
+                     test_mode: bool = False) -> Dict[str, Any]:
         """
         Exécute le processus complet d'évaluation
         
         Args:
             input_files: Liste des fichiers à traiter
-            test_mode: Si True, génère seulement 5 QCM pour tester
+            selected_criteria: Critères sélectionnés pour la génération de QCM
+            advanced_criteria: Critères pour les tests avancés d'évaluation
+            test_mode: Si True, génère un nombre réduit de QCM
             
         Returns:
             Dict[str, Any]: Résultats complets de l'évaluation
@@ -156,14 +148,18 @@ class LLMEvaluationSystem:
             self.generate_and_store_embeddings(chunks)
             
             # 3. Génération des QCM
-            qcm_list = self.qcm_generator.generate_qcm(chunks[0], test_mode=test_mode)
+            qcm_list = self.generate_qcm(
+                chunks[0], 
+                selected_criteria=selected_criteria, 
+                test_mode=test_mode
+            )
             
             # Sauvegarde des QCM générés
             qcm_path = save_json(qcm_list, "qcm", self.directories['qcm'])
             logger.info(f"QCM saved to {qcm_path}")
             
             # 4. Évaluation du modèle
-            evaluation_results = self.llm_evaluator.evaluate_model(qcm_list, test_mode=test_mode)
+            evaluation_results = self.evaluate_model(qcm_list, advanced_criteria=advanced_criteria)
             
             # 5. Génération des rapports
             report_paths = self.report_generator.generate_report(evaluation_results)
@@ -175,12 +171,14 @@ class LLMEvaluationSystem:
             final_results = {
                 'evaluation_results': evaluation_results,
                 'report_paths': report_paths,
-                'qcm': qcm_list,  # Ajouter les QCM aux résultats pour faciliter leur affichage
+                'qcm': qcm_list,
                 'metadata': {
                     'duration': format_duration(duration),
                     'chunks_processed': len(chunks),
                     'qcm_generated': len(qcm_list),
-                    'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+                    'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+                    'selected_criteria': selected_criteria,
+                    'advanced_criteria': advanced_criteria
                 }
             }
             
@@ -197,7 +195,7 @@ def main():
         # Initialisation du système
         system = LLMEvaluationSystem()
         
-         # Récupération des fichiers d'entrée - MODIFICATION ICI
+        # Récupération des fichiers d'entrée
         input_files = list(Path(INPUT_DIR).glob('*.pdf'))  # Cherche les .pdf
         input_files.extend(list(Path(INPUT_DIR).glob('*.PDF')))  # Cherche aussi les .PDF majuscules
         
@@ -208,8 +206,7 @@ def main():
             logger.error(f"No PDF files found in input directory: {INPUT_DIR}")
             return
         
-        
-        # Exécution de l'évaluation
+        # Exécution de l'évaluation avec paramètres par défaut (génériques sans tests avancés)
         results = system.run_evaluation([str(f) for f in input_files])
         
         # Affichage des résultats

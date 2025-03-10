@@ -180,6 +180,22 @@ document.addEventListener('DOMContentLoaded', function() {
      * Gère les notifications WebSocket
      */
     function handleNotifications(data) {
+        if (data.evaluation_id !== currentEvaluationId) return;
+        
+        if (data.type === "phase_change") {
+            if (data.previous_phase === "generation" && data.new_phase === "evaluation") {
+                // Afficher un message de transition
+                Utils.showToast("Génération des QCM terminée, début de l'évaluation", "info");
+                
+                // Mettre à jour l'interface
+                evalDetailsEl.innerHTML = `
+                    <div class="phase-transition">
+                        <div class="loading-spinner"></div>
+                        <span>Début de l'évaluation des QCM...</span>
+                    </div>
+                `;
+            }
+        }
         // Ajouter la notification à l'activité
         addActivityItem(data);
         

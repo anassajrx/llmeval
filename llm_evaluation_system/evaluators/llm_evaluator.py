@@ -61,14 +61,14 @@ class LLMEvaluator:
 
     def evaluate_model(self, qcm_list: List[Dict[str, Any]], 
                       batch_size: int = EVALUATION_CONFIG["batch_size"],
-                      test_mode: bool = True) -> Dict[str, Any]:
+                      advanced_criteria: List[str] = None) -> Dict[str, Any]:
         """
         Évalue le modèle avec les QCM générés
         
         Args:
             qcm_list (List[Dict[str, Any]]): Liste des QCM pour l'évaluation
             batch_size (int): Taille des lots de traitement
-            test_mode (bool): Si True, limite les tests avancés
+            advanced_criteria (List[str]): Critères pour les tests avancés (None = tests standard uniquement)
             
         Returns:
             Dict[str, Any]: Résultats de l'évaluation
@@ -103,13 +103,18 @@ class LLMEvaluator:
                         standard_result = self._create_response_dict(qcm, response)
                         results['details'].append(standard_result)
                         
-                        # En mode test, on saute les tests avancés
-                        if not test_mode:
+                        # Vérifier si des tests avancés sont demandés pour ce critère
+                        run_advanced = False
+                        if advanced_criteria and qcm['criterion'] in advanced_criteria:
+                            run_advanced = True
+                            
+                        # Exécuter les tests avancés si demandés
+                        if run_advanced:
                             time.sleep(RETRY_CONFIG["base_delay"])
                             advanced_result = self._run_advanced_tests(qcm)
                             self._update_results(results, standard_result, advanced_result, qcm)
                         else:
-                            # En mode test, on met à jour uniquement avec les résultats standards
+                            # Sinon, mise à jour uniquement avec les résultats standards
                             self._update_results(results, standard_result, {}, qcm)
                     else:
                         results['error_count'] += 1
@@ -122,6 +127,13 @@ class LLMEvaluator:
                 time.sleep(RETRY_CONFIG["base_delay"] * 2)
 
         self._calculate_final_metrics(results, total_qcm)
+        
+        # Ajouter des métadonnées sur les tests avancés
+        results['advanced_testing_info'] = {
+            'criteria_tested': advanced_criteria if advanced_criteria else [],
+            'enabled': True if advanced_criteria else False
+        }
+        
         return results
 
     def _test_bias_resistance(self, qcm: Dict[str, Any]) -> Dict[str, Any]:
@@ -193,6 +205,18 @@ class LLMEvaluator:
             return self._create_response_dict(qcm, response)
         
         return self._create_error_response(qcm)
+        
+    def _create_error_response(self, qcm: Dict) -> Dict:
+        """Crée une réponse d'erreur"""
+        return {
+            'criterion': qcm['criterion'],
+            'question': qcm['question'],
+            'model_answer': 'ERROR',
+            'correct_answer': qcm['correct_answer'],
+            'score': 0,
+            'max_points': qcm['points'],
+            'status': 'error'
+        }
 
     def _create_response_dict(self, qcm: Dict, response: str) -> Dict:
         """Crée un dictionnaire de réponse"""
@@ -205,18 +229,6 @@ class LLMEvaluator:
             'score': qcm['points'] if correct else 0,
             'max_points': qcm['points'],
             'status': 'success'
-        }
-
-    def _create_error_response(self, qcm: Dict) -> Dict:
-        """Crée une réponse d'erreur"""
-        return {
-            'criterion': qcm['criterion'],
-            'question': qcm['question'],
-            'model_answer': 'ERROR',
-            'correct_answer': qcm['correct_answer'],
-            'score': 0,
-            'max_points': qcm['points'],
-            'status': 'error'
         }
 
     def _modify_gender_context(self, qcm: Dict) -> Dict:

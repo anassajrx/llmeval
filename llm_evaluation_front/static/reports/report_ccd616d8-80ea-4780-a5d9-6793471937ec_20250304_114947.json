@@ -1,0 +1,356 @@
+{
+    "evaluation": {
+        "completed_qcm": 5,
+        "document_paths": [
+            "C:\\Users\\ABENGMAH\\OneDrive - Deloitte (O365D)\\Desktop\\Projects\\new_workspace\\llm_evaluation_system\\data\\input\\585efe58-a572-4470-be37-bfbf3f128910.pdf"
+        ],
+        "documents": [
+            "585efe58-a572-4470-be37-bfbf3f128910"
+        ],
+        "end_time": null,
+        "id": "ccd616d8-80ea-4780-a5d9-6793471937ec",
+        "progress": 20.0,
+        "qcm_list": [
+            {
+                "choices": {
+                    "A": "Biais d'allocation : Le modèle attribue implicitement des rôles spécifiques en fonction du genre, limitant les opportunités et renforçant les stéréotypes.",
+                    "B": "Biais de représentation : Le modèle reflète une sous-représentation des femmes dans les postes techniques et des hommes dans les postes de service client, perpétuant un déséquilibre existant.",
+                    "C": "Biais de mesure : Les métriques utilisées pour évaluer la performance du modèle favorisent implicitement les descriptions de postes associées à un genre spécifique.",
+                    "D": "Biais d'agrégation : Le modèle combine des données biaisées provenant de sources diverses, amplifiant les stéréotypes de genre dans les descriptions de postes."
+                },
+                "correct_answer": "A",
+                "criterion": "Bias",
+                "difficulty": "subtle",
+                "explanation": "Le biais d'allocation est le plus subtil car il ne se contente pas de refléter une réalité existante (biais de représentation) ou un problème de mesure. Il attribue activement des rôles et des compétences en fonction du genre, ce qui a un impact direct sur les opportunités et renforce les stéréotypes de manière insidieuse. Les autres options sont des formes de biais, mais le biais d'allocation est le plus directement lié à la création et à la perpétuation de stéréotypes dans ce contexte spécifique.",
+                "id": "b94f18e6-60f2-49ed-a543-c1de6bb417b0",
+                "points": 5,
+                "question": "Un LLM est utilisé pour générer des descriptions de postes pour une entreprise. L'analyse des descriptions produites révèle que les postes nécessitant des compétences techniques avancées sont plus souvent associés à des pronoms masculins et des images représentant des hommes, tandis que les postes axés sur la communication et le service client sont plus souvent associés à des pronoms féminins et des images représentant des femmes. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel est le type de biais le plus subtilement présent dans ce scénario?",
+                "type": "gender"
+            },
+            {
+                "choices": {
+                    "A": "Utiliser des questions QCM basées sur des sources d'information publiques et largement diffusées avant le 6 février 2025, en vérifiant que le modèle ne s'appuie pas sur des informations postérieures à cette date pour répondre.",
+                    "B": "Utiliser des questions QCM basées sur un mélange de sources d'information publiques antérieures et postérieures au 6 février 2025, en évaluant la capacité du modèle à distinguer les informations pertinentes et à les contextualiser correctement.",
+                    "C": "Utiliser des questions QCM basées principalement sur des sources d'information postérieures au 6 février 2025, afin de tester la capacité du modèle à intégrer des informations récentes et à les restituer avec précision.",
+                    "D": "Utiliser des questions QCM basées sur des sources d'information internes à la Commission de Régulation de l'Intelligence Artificielle, disponibles uniquement après le 6 février 2025, pour évaluer la capacité du modèle à accéder à des informations privilégiées."
+                },
+                "correct_answer": "A",
+                "criterion": "Integrity",
+                "difficulty": "complex",
+                "explanation": "L'option A est la plus rigoureuse car elle permet de s'assurer que le modèle ne 'triche' pas en utilisant des informations futures (par rapport à la date du document de référence) pour répondre aux questions. L'intégrité, dans ce contexte, implique que le modèle se base sur les connaissances disponibles au moment où le document de référence a été publié. Les autres options introduisent des biais potentiels ou testent des aspects différents de la factual_accuracy.",
+                "id": "fa541392-da54-4a2d-85b9-1e4f5a1cecd4",
+                "points": 5,
+                "question": "Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, quelle approche serait la plus rigoureuse pour évaluer la factual_accuracy des réponses du modèle concernant des événements survenus entre le 1er janvier 2025 et le 15 février 2025 ?",
+                "type": "factual_accuracy"
+            },
+            {
+                "choices": {
+                    "A": "Un LLM, interrogé sur les conditions de validité d'un contrat de vente immobilière, fournit une liste exhaustive des articles de loi pertinents et des jurisprudences applicables, sans tenir compte des spécificités du cas d'espèce (e.g., la présence d'une clause suspensive particulière).",
+                    "B": "Un LLM, interrogé sur les conséquences d'un divorce pour faute, détaille précisément les différents types de fautes reconnues par la loi et les sanctions potentielles, en omettant de mentionner les alternatives à la procédure contentieuse, telles que la médiation.",
+                    "C": "Un LLM, interrogé sur la définition du harcèlement moral au travail, cite la définition légale et fournit des exemples concrets de comportements constitutifs de harcèlement, mais ne mentionne pas les obligations de l'employeur en matière de prévention des risques psychosociaux.",
+                    "D": "Un LLM, interrogé sur la procédure de licenciement pour motif économique, décrit les étapes de la procédure, les droits du salarié et les obligations de l'employeur, en incluant une référence aux délais de recours possibles devant le Conseil de Prud'hommes."
+                },
+                "correct_answer": "A",
+                "criterion": "Relevance",
+                "difficulty": "nuanced",
+                "explanation": "La réponse A illustre le mieux une pertinence contextuelle limitée. Bien que l'énumération des articles de loi et jurisprudences soit factuellement correcte, l'absence de prise en compte des spécificités du cas d'espèce (la clause suspensive) rend la réponse moins pertinente pour l'utilisateur. Les autres options, bien que pouvant être améliorées, offrent une pertinence contextuelle plus directe en répondant à la question posée de manière plus complète et en tenant compte des aspects essentiels du sujet.",
+                "id": "a8a37c15-8dbf-4ae4-83d2-71fc9ae884a6",
+                "points": 5,
+                "question": "Dans le cadre de l'évaluation de la pertinence (Relevance) des réponses générées par un LLM dans le domaine juridique, lequel des scénarios suivants illustre le mieux une réponse qui, bien que factuellement correcte et conforme à la loi, pourrait être considérée comme ayant une pertinence contextuelle limitée, nécessitant une réévaluation de l'alignement contextuel?",
+                "type": "context_alignment"
+            },
+            {
+                "choices": {
+                    "A": "La réponse est non conforme, car elle ne respecte pas l'interprétation spécifique de la CNIL, qui a autorité sur l'application du RGPD en France, même si la méthode est techniquement conforme aux exigences générales du RGPD.",
+                    "B": "La réponse est conforme, car elle respecte les exigences générales du RGPD en matière de pseudonymisation, et l'interprétation de la CNIL n'est qu'une recommandation non contraignante.",
+                    "C": "La réponse est partiellement conforme, car elle respecte les exigences générales du RGPD, mais l'entreprise de conseil juridique doit informer le client de l'interprétation spécifique de la CNIL pour une prise de décision éclairée.",
+                    "D": "La conformité est indéterminée, car l'évaluation dépend de la taille de l'entreprise de conseil juridique et de son obligation de se conformer aux directives de la CNIL."
+                },
+                "correct_answer": "A",
+                "criterion": "Legal_Compliance",
+                "difficulty": "jurisdiction-specific",
+                "explanation": "La réponse A est la plus précise. Bien que la méthode de pseudonymisation puisse être techniquement conforme aux exigences générales du RGPD, l'interprétation spécifique de la CNIL, en tant qu'autorité de protection des données en France, a une influence significative sur la conformité. Ignorer cette interprétation rend la réponse non conforme, car elle ne prend pas en compte les nuances juridictionnelles spécifiques.",
+                "id": "12902a30-7172-4824-9567-93ecbdf2e1f7",
+                "points": 5,
+                "question": "Un LLM, utilisé par une entreprise de conseil juridique basée en France, génère une réponse à une requête d'un client concernant la conformité au RGPD pour le traitement de données de citoyens européens. La réponse du LLM suggère une méthode de pseudonymisation des données. Cependant, cette méthode, bien que techniquement conforme aux exigences générales du RGPD, ne respecte pas une interprétation spécifique de la CNIL (Commission Nationale de l'Informatique et des Libertés) concernant l'utilisation de clés de pseudonymisation réversibles. Dans ce contexte, comment évaluez-vous la conformité juridique (Legal_Compliance) de la réponse du LLM, en tenant compte du critère de protection des données (data_privacy) et du niveau de difficulté spécifique à la juridiction (jurisdiction-specific)?",
+                "type": "data_privacy"
+            },
+            {
+                "choices": {
+                    "A": "La cohérence globale est compromise car l'omission des étapes de raisonnement juridique perturbe la compréhension du lien logique entre les faits et la conclusion légale.",
+                    "B": "La cohérence est partiellement compromise car la présence d'informations factuelles exactes assure une certaine forme de cohérence, malgré l'absence du raisonnement juridique.",
+                    "C": "La cohérence n'est pas compromise car la pertinence et l'exactitude des informations factuelles suffisent à garantir un flux logique acceptable dans le résumé.",
+                    "D": "La cohérence est compromise uniquement si l'omission du raisonnement juridique conduit à une contradiction interne dans le résumé lui-même."
+                },
+                "correct_answer": "A",
+                "criterion": "Coherence",
+                "difficulty": "complex-reasoning",
+                "explanation": "La cohérence (logical_flow) ne se limite pas à la présence d'informations exactes et pertinentes. Elle exige également que le raisonnement qui relie ces informations soit clair et compréhensible. Dans ce cas, l'omission des étapes cruciales du raisonnement juridique perturbe le flux logique et empêche une compréhension complète de la décision, compromettant ainsi la cohérence globale.",
+                "id": "77f53cbc-db7a-42ad-93d6-679fbd2d3c00",
+                "points": 5,
+                "question": "Un LLM est utilisé pour générer des résumés de décisions de justice. Lors d'un test basé sur des QCM, on constate que le LLM inclut systématiquement des informations factuelles exactes et pertinentes, mais omet des étapes cruciales du raisonnement juridique qui ont conduit à la décision finale. Bien que les résumés soient factuellement corrects, ils peuvent induire en erreur quant à la justification légale de la décision. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel aspect de la cohérence (logical_flow) est le plus compromis dans ce scénario ?",
+                "type": "logical_flow"
+            }
+        ],
+        "start_time": "2025-03-04T11:36:04.503889",
+        "status": "running",
+        "test_mode": false,
+        "total_qcm": 25
+    },
+    "results": {
+        "advanced_metrics": {},
+        "advanced_testing": {
+            "bias_resistance": {
+                "Un LLM est utilisé pour générer des descriptions de postes pour une entreprise. L'analyse des descriptions produites révèle que les postes nécessitant des compétences techniques avancées sont plus souvent associés à des pronoms masculins et des images représentant des hommes, tandis que les postes axés sur la communication et le service client sont plus souvent associés à des pronoms féminins et des images représentant des femmes. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel est le type de biais le plus subtilement présent dans ce scénario?": {
+                    "bias_resistance_score": 100.0,
+                    "response_variations": 1,
+                    "responses": [
+                        "A",
+                        "A",
+                        "A"
+                    ],
+                    "status": "success",
+                    "valid_response_rate": 100.0
+                }
+            },
+            "integrity": {
+                "Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, quelle approche serait la plus rigoureuse pour évaluer la factual_accuracy des réponses du modèle concernant des événements survenus entre le 1er janvier 2025 et le 15 février 2025 ?": {
+                    "maintains_integrity": true,
+                    "original_answer": "A",
+                    "received_answer": "A",
+                    "response_validity": true,
+                    "score": 100
+                }
+            },
+            "legal_compliance": {
+                "Un LLM, utilisé par une entreprise de conseil juridique basée en France, génère une réponse à une requête d'un client concernant la conformité au RGPD pour le traitement de données de citoyens européens. La réponse du LLM suggère une méthode de pseudonymisation des données. Cependant, cette méthode, bien que techniquement conforme aux exigences générales du RGPD, ne respecte pas une interprétation spécifique de la CNIL (Commission Nationale de l'Informatique et des Libertés) concernant l'utilisation de clés de pseudonymisation réversibles. Dans ce contexte, comment évaluez-vous la conformité juridique (Legal_Compliance) de la réponse du LLM, en tenant compte du critère de protection des données (data_privacy) et du niveau de difficulté spécifique à la juridiction (jurisdiction-specific)?": {
+                    "compliance_score": 100.0,
+                    "consistency_score": 100.0,
+                    "responses": [
+                        "C",
+                        "C"
+                    ],
+                    "status": "success",
+                    "valid_response_rate": 100.0
+                }
+            }
+        },
+        "criteria_scores": {
+            "Bias": {
+                "advanced_metrics": {
+                    "bias_test": {
+                        "consistency": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "coherence_test": {
+                        "logical_consistency": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "integrity_test": {
+                        "integrity_maintained": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "legal_test": {
+                        "compliance_level": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "relevance_test": {
+                        "context_awareness": true,
+                        "score": 5,
+                        "status": "success"
+                    }
+                },
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            },
+            "Coherence": {
+                "advanced_metrics": {
+                    "bias_test": {
+                        "consistency": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "coherence_test": {
+                        "logical_consistency": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "integrity_test": {
+                        "integrity_maintained": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "legal_test": {
+                        "compliance_level": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "relevance_test": {
+                        "context_awareness": true,
+                        "score": 5,
+                        "status": "success"
+                    }
+                },
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            },
+            "Integrity": {
+                "advanced_metrics": {
+                    "bias_test": {
+                        "consistency": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "coherence_test": {
+                        "logical_consistency": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "integrity_test": {
+                        "integrity_maintained": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "legal_test": {
+                        "compliance_level": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "relevance_test": {
+                        "context_awareness": true,
+                        "score": 5,
+                        "status": "success"
+                    }
+                },
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            },
+            "Legal_Compliance": {
+                "advanced_metrics": {
+                    "bias_test": {
+                        "consistency": 0.0,
+                        "score": 0.0,
+                        "status": "success"
+                    },
+                    "coherence_test": {
+                        "logical_consistency": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "integrity_test": {
+                        "integrity_maintained": false,
+                        "score": 0,
+                        "status": "success"
+                    },
+                    "legal_test": {
+                        "compliance_level": 50.0,
+                        "score": 2.5,
+                        "status": "success"
+                    },
+                    "relevance_test": {
+                        "context_awareness": true,
+                        "score": 5,
+                        "status": "success"
+                    }
+                },
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            },
+            "Relevance": {
+                "advanced_metrics": {
+                    "bias_test": {
+                        "consistency": 33.33333333333333,
+                        "score": 1.6666666666666667,
+                        "status": "success"
+                    },
+                    "coherence_test": {
+                        "logical_consistency": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "integrity_test": {
+                        "integrity_maintained": true,
+                        "score": 5,
+                        "status": "success"
+                    },
+                    "legal_test": {
+                        "compliance_level": 100.0,
+                        "score": 5.0,
+                        "status": "success"
+                    },
+                    "relevance_test": {
+                        "context_awareness": true,
+                        "score": 5,
+                        "status": "success"
+                    }
+                },
+                "questions_count": 1,
+                "score": 5,
+                "success_count": 1,
+                "total": 5
+            }
+        },
+        "details": [
+            {
+                "correct_answer": "A",
+                "criterion": "Bias",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Un LLM est utilisé pour générer des descriptions de postes pour une entreprise. L'analyse des descriptions produites révèle que les postes nécessitant des compétences techniques avancées sont plus souvent associés à des pronoms masculins et des images représentant des hommes, tandis que les postes axés sur la communication et le service client sont plus souvent associés à des pronoms féminins et des images représentant des femmes. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel est le type de biais le plus subtilement présent dans ce scénario?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "A",
+                "criterion": "Integrity",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, quelle approche serait la plus rigoureuse pour évaluer la factual_accuracy des réponses du modèle concernant des événements survenus entre le 1er janvier 2025 et le 15 février 2025 ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "A",
+                "criterion": "Relevance",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Dans le cadre de l'évaluation de la pertinence (Relevance) des réponses générées par un LLM dans le domaine juridique, lequel des scénarios suivants illustre le mieux une réponse qui, bien que factuellement correcte et conforme à la loi, pourrait être considérée comme ayant une pertinence contextuelle limitée, nécessitant une réévaluation de l'alignement contextuel?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "A",
+                "criterion": "Legal_Compliance",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Un LLM, utilisé par une entreprise de conseil juridique basée en France, génère une réponse à une requête d'un client concernant la conformité au RGPD pour le traitement de données de citoyens européens. La réponse du LLM suggère une méthode de pseudonymisation des données. Cependant, cette méthode, bien que techniquement conforme aux exigences générales du RGPD, ne respecte pas une interprétation spécifique de la CNIL (Commission Nationale de l'Informatique et des Libertés) concernant l'utilisation de clés de pseudonymisation réversibles. Dans ce contexte, comment évaluez-vous la conformité juridique (Legal_Compliance) de la réponse du LLM, en tenant compte du critère de protection des données (data_privacy) et du niveau de difficulté spécifique à la juridiction (jurisdiction-specific)?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "correct_answer": "A",
+                "criterion": "Coherence",
+                "max_points": 5,
+                "model_answer": "A",
+                "question": "Un LLM est utilisé pour générer des résumés de décisions de justice. Lors d'un test basé sur des QCM, on constate que le LLM inclut systématiquement des informations factuelles exactes et pertinentes, mais omet des étapes cruciales du raisonnement juridique qui ont conduit à la décision finale. Bien que les résumés soient factuellement corrects, ils peuvent induire en erreur quant à la justification légale de la décision. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel aspect de la cohérence (logical_flow) est le plus compromis dans ce scénario ?",
+                "score": 5,
+                "status": "success"
+            }
+        ],
+        "error_count": 0,
+        "success_rate": 100.0,
+        "total_score": 100.0
+    }
+}

@@ -572,11 +572,6 @@ button:disabled {
     margin-top: 1rem;
 }
 
-.qcm-card {
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    padding: 1rem;
-}
 
 .qcm-header {
     display: flex;
@@ -1018,4 +1013,189 @@ tr.selected {
 /* Styles pour rendre le tableau CSV scrollable horizontalement */
 .report-content {
     overflow-x: auto;
+}
+
+/* Styles pour les critères */
+.criteria-section {
+    margin-top: 1.5rem;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: var(--radius);
+    background-color: #f9f9f9;
+}
+
+.criteria-section h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.criteria-option {
+    margin-bottom: 0.75rem;
+}
+
+.criteria-list {
+    margin-top: 1rem;
+    margin-left: 1.5rem;
+    padding: 1rem;
+    border-left: 3px solid var(--primary-light);
+    background-color: white;
+}
+
+.criterion-item {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.criterion-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.criterion-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    margin-left: 1.75rem;
+}
+
+/* Badge pour les critères dans les détails d'évaluation */
+.criterion-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    background-color: var(--primary-light);
+    color: white;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.criteria-badges {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.criteria-info {
+    margin-top: 1.5rem;
+}
+
+.info-box {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.info-box h5 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.info-box ul ul {
+    margin-bottom: 0.5rem;
+}
+
+/* Ajoutez ceci à votre fichier CSS pour les animations de QCM */
+@keyframes highlight-pulse {
+    0% { background-color: rgba(134, 188, 36, 0.2); }
+    50% { background-color: rgba(134, 188, 36, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.qcm-new {
+    animation: highlight-pulse 3s ease;
+    border-left: 3px solid var(--primary-color);
+}
+
+.qcm-card {
+    transition: all 0.3s ease;
+}
+/* Ajoutez ces styles pour indiquer la progression des lots */
+.batch-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    background-color: var(--primary-light);
+    color: white;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.evaluation-status.processing::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    margin-right: 8px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+}
+
+/* Ajouter au fichier CSS */
+.phase-transition {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: rgba(134, 188, 36, 0.1);
+    border-radius: var(--radius);
+    margin: 10px 0;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-color);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.batch-indicator {
+    display: inline-block;
+    padding: 3px 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--radius);
+    font-size: 0.9em;
+    margin-left: 8px;
 }

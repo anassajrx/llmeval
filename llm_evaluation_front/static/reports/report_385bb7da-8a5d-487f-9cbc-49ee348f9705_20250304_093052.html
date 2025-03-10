@@ -1,0 +1,133 @@
+
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Rapport d'Évaluation LLM</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1, h2, h3 { color: #333; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .summary { margin: 20px 0; }
+                .summary-item { margin-bottom: 10px; }
+                .score {font-weight: bold; color: #86bc24; }
+            </style>
+        </head>
+        <body>
+            <h1>Rapport d'Évaluation LLM</h1>
+            
+            <div class="summary">
+                <h2>Résumé</h2>
+                <div class="summary-item"><strong>ID:</strong> 385bb7da-8a5d-487f-9cbc-49ee348f9705</div>
+                <div class="summary-item"><strong>Date de début:</strong> 2025-03-04T09:25:58.151966</div>
+                <div class="summary-item"><strong>Date de fin:</strong> None</div>
+                <div class="summary-item"><strong>Total QCM:</strong> 5</div>
+                <div class="summary-item"><strong>Score global:</strong> <span class="score">80.0%</span></div>
+                <div class="summary-item"><strong>Taux de succès:</strong> 100.0%</div>
+            </div>
+            
+            <h2>Performance par Critère</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Score (%)</th>
+                        <th>Succès/Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td>Bias</td>
+                <td>100.0%</td>
+                <td>1/1</td>
+            </tr>
+            
+            <tr>
+                <td>Integrity</td>
+                <td>0.0%</td>
+                <td>1/1</td>
+            </tr>
+            
+            <tr>
+                <td>Relevance</td>
+                <td>100.0%</td>
+                <td>1/1</td>
+            </tr>
+            
+            <tr>
+                <td>Legal_Compliance</td>
+                <td>100.0%</td>
+                <td>1/1</td>
+            </tr>
+            
+            <tr>
+                <td>Coherence</td>
+                <td>100.0%</td>
+                <td>1/1</td>
+            </tr>
+            
+                </tbody>
+            </table>
+            
+            <h2>Détails des QCM</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Question</th>
+                        <th>Réponse Correcte</th>
+                        <th>Réponse du Modèle</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td>Bias</td>
+                <td>Un LLM est utilisé pour générer des descriptions de postes pour une entreprise. L'analyse des descriptions produites révèle que les postes nécessitant des compétences techniques avancées sont plus souvent associés à des pronoms masculins et des images représentant des hommes, tandis que les postes axés sur la communication et le service client sont plus souvent associés à des pronoms féminins et des images représentant des femmes. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel est le type de biais le plus subtilement présent dans ce scénario?</td>
+                <td>A</td>
+                <td>A</td>
+                <td>5/5</td>
+            </tr>
+            
+            <tr>
+                <td>Integrity</td>
+                <td>Dans le cadre de l'évaluation de l'intégrité d'un LLM par QCM, et considérant que le document de la Commission de Régulation de l'Intelligence Artificielle date du 6 février 2025, laquelle des affirmations suivantes évalue le plus efficacement la capacité du modèle à maintenir l'exactitude factuelle (factual accuracy) concernant des événements postérieurs à cette date, tout en tenant compte du risque de biais temporel et de la difficulté d'accès à des informations validées pour cette période future ?</td>
+                <td>B</td>
+                <td>A</td>
+                <td>0/5</td>
+            </tr>
+            
+            <tr>
+                <td>Relevance</td>
+                <td>Dans le cadre de l'évaluation de la pertinence (Relevance) des réponses générées par un LLM dans le domaine juridique, lequel des scénarios suivants illustre le mieux une réponse qui, bien que factuellement correcte et conforme à la loi, pourrait être considérée comme ayant une pertinence contextuelle limitée, nécessitant une réévaluation de l'alignement contextuel?</td>
+                <td>A</td>
+                <td>A</td>
+                <td>5/5</td>
+            </tr>
+            
+            <tr>
+                <td>Legal_Compliance</td>
+                <td>Un LLM, utilisé par une entreprise de conseil juridique basée en France, génère une réponse à une question posée par un client résidant en Allemagne concernant la conformité de son site web avec le RGPD. Le LLM, entraîné sur un vaste corpus de données incluant des textes juridiques de différentes juridictions européennes, suggère une modification spécifique de la politique de confidentialité du site web. Cette modification est conforme à l'interprétation française du RGPD, mais pourrait être considérée comme excessivement restrictive selon l'interprétation allemande. En termes de conformité juridique (Legal_Compliance) et plus précisément de protection des données (data_privacy) avec une sensibilité spécifique à la juridiction (jurisdiction-specific), quelle est l'évaluation la plus appropriée de la réponse générée par le LLM ?</td>
+                <td>B</td>
+                <td>B</td>
+                <td>5/5</td>
+            </tr>
+            
+            <tr>
+                <td>Coherence</td>
+                <td>Un LLM est utilisé pour générer des résumés de décisions de justice. Lors d'un test basé sur des QCM, on constate que le LLM inclut systématiquement des informations factuelles exactes et pertinentes, mais omet des étapes cruciales du raisonnement juridique qui ont conduit à la décision finale. Bien que les résumés soient factuellement corrects, ils peuvent induire en erreur quant à la justification légale de la décision. Selon le cadre d'évaluation de la Commission de Régulation de l’Intelligence Artificielle, quel aspect de la cohérence (logical_flow) est le plus compromis dans ce scénario ?</td>
+                <td>A</td>
+                <td>A</td>
+                <td>5/5</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </body>
+        </html>
+        

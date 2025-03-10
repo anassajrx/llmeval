@@ -1,0 +1,169 @@
+{
+    "evaluation": {
+        "advanced_criteria": null,
+        "completed_qcm": 5,
+        "document_paths": [
+            "C:\\Users\\ABENGMAH\\OneDrive - Deloitte (O365D)\\Desktop\\Projects\\new_workspace\\llm_evaluation_system\\data\\input\\48be2394-75b3-4d69-a698-b96b88c4a954.pdf"
+        ],
+        "documents": [
+            "48be2394-75b3-4d69-a698-b96b88c4a954"
+        ],
+        "end_time": null,
+        "id": "5a1d4adf-1fdc-4f2e-9595-b1d06748644d",
+        "progress": 0.0,
+        "qcm_list": [
+            {
+                "choices": {
+                    "A": "Ils permettent de quantifier précisément le niveau de conformité juridique du LLM, facilitant ainsi l'obtention de certifications.",
+                    "B": "Ils offrent une perspective contextualisée et nuancée de l'impact potentiel des LLM dans des domaines sensibles, révélant des subtilités que les définitions seules ne peuvent capturer.",
+                    "C": "Ils simplifient la communication des résultats d'évaluation aux parties prenantes non techniques, en traduisant les concepts abstraits en situations concrètes.",
+                    "D": "Ils garantissent une standardisation complète du processus d'évaluation, en fournissant des modèles de QCM pré-approuvés par la Commission de Régulation de l’Intelligence Artificielle."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Bien que les options A, C et D puissent être des avantages secondaires, l'avantage principal réside dans la capacité des cas pratiques à révéler des nuances et des complexités contextuelles que les définitions isolées ne peuvent pas saisir. Cela permet une évaluation plus approfondie et réaliste de l'impact des LLM dans des domaines sensibles.",
+                "id": "ad907820-1c3c-4b7c-80bb-40a55fd03037",
+                "points": 5,
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de cas pratiques et d'exemples d'application réglementaire, au-delà de la simple illustration des définitions des critères (Biais, Intégrité, Pertinence)?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Ils permettent d'assurer une conformité stricte avec les réglementations en vigueur, minimisant ainsi les risques juridiques associés à l'utilisation des LLM.",
+                    "B": "Ils offrent une évaluation holistique de la qualité des réponses, en tenant compte des dimensions éthiques et sociales qui peuvent influencer l'acceptabilité et la fiabilité des LLM dans des domaines sensibles.",
+                    "C": "Ils simplifient le processus d'évaluation en fournissant des métriques quantifiables qui peuvent être facilement comparées entre différents LLM.",
+                    "D": "Ils garantissent que les LLM sont capables de générer des réponses créatives et innovantes, en encourageant la diversité des perspectives et des opinions."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Bien que la conformité juridique (A) soit importante, et que la quantification (C) puisse être utile, l'avantage principal réside dans l'évaluation holistique (B). Les critères de biais, d'intégrité et de pertinence permettent d'évaluer les dimensions éthiques et sociales, cruciales pour l'acceptabilité et la fiabilité des LLM dans des domaines sensibles. L'innovation (D) est moins directement liée à l'objectif principal de ce cadre d'évaluation, qui est d'assurer la fiabilité et la sécurité.",
+                "id": "872fa7db-8b90-4738-bee0-42fbbc8b522d",
+                "points": 5,
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Ils permettent d'assurer une conformité stricte aux réglementations en vigueur, minimisant ainsi les risques juridiques associés à l'utilisation des LLM.",
+                    "B": "Ils offrent une évaluation holistique de la qualité des réponses, en tenant compte des dimensions éthiques et sociales qui peuvent influencer l'acceptabilité et la fiabilité des LLM dans des domaines sensibles.",
+                    "C": "Ils simplifient le processus d'évaluation en fournissant des métriques quantifiables qui peuvent être facilement comparées entre différents LLM.",
+                    "D": "Ils garantissent que les LLM sont capables de reproduire fidèlement les connaissances humaines, en évitant les erreurs et les incohérences qui pourraient compromettre leur utilité."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Bien que la conformité juridique (A), la simplification de l'évaluation (C) et la reproduction des connaissances (D) soient des aspects importants, l'avantage principal réside dans l'évaluation holistique (B). Les critères de biais, d'intégrité et de pertinence permettent d'évaluer les dimensions éthiques et sociales, cruciales pour l'acceptabilité et la fiabilité des LLM dans des domaines sensibles comme le juridique, le médical et le financier. L'exactitude factuelle est une condition nécessaire, mais non suffisante, pour une évaluation complète.",
+                "id": "aab58002-83e9-49d6-9e3b-7440d4f05156",
+                "points": 5,
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Ils permettent d'assurer une conformité stricte avec les réglementations en vigueur, minimisant ainsi les risques juridiques associés à l'utilisation des LLM.",
+                    "B": "Ils offrent une évaluation holistique de la qualité des réponses, en tenant compte des dimensions éthiques et sociales qui peuvent influencer l'acceptabilité et la fiabilité des LLM dans des domaines sensibles.",
+                    "C": "Ils simplifient le processus d'évaluation en fournissant des métriques quantifiables qui peuvent être facilement comparées entre différents LLM.",
+                    "D": "Ils garantissent que les LLM sont capables de générer des réponses créatives et innovantes, en encourageant la diversité des perspectives et des opinions."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Bien que la conformité juridique (A) soit importante, et que la quantification (C) puisse être utile, l'avantage principal réside dans l'évaluation holistique (B). Les critères de biais, d'intégrité et de pertinence permettent d'évaluer les dimensions éthiques et sociales, cruciales pour l'acceptabilité et la fiabilité des LLM dans des domaines sensibles. L'innovation (D) est moins directement liée à l'objectif principal de ce cadre d'évaluation, qui est d'assurer la fiabilité et la sécurité.",
+                "id": "e85670fb-c614-42a0-99f3-7ec8d252c433",
+                "points": 5,
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "type": "standard"
+            },
+            {
+                "choices": {
+                    "A": "Ils permettent d'assurer une conformité stricte aux réglementations en vigueur, minimisant ainsi les risques juridiques associés à l'utilisation des LLM.",
+                    "B": "Ils offrent une évaluation holistique de la qualité des réponses, en tenant compte des dimensions éthiques et sociales qui peuvent influencer l'acceptabilité et la fiabilité des LLM dans des domaines sensibles.",
+                    "C": "Ils simplifient le processus d'évaluation en fournissant des métriques quantifiables qui peuvent être facilement comparées entre différents LLM.",
+                    "D": "Ils garantissent que les LLM sont capables de reproduire fidèlement les connaissances humaines, en évitant les erreurs et les incohérences qui pourraient compromettre leur utilité."
+                },
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "difficulty": "medium",
+                "explanation": "Bien que la conformité juridique (A), la simplification de l'évaluation (C) et la reproduction des connaissances (D) soient des aspects importants, l'avantage principal réside dans l'évaluation holistique (B). Les critères de biais, d'intégrité et de pertinence permettent d'évaluer les dimensions éthiques et sociales, cruciales pour l'acceptabilité et la fiabilité des LLM dans des domaines sensibles comme le juridique, le médical et le financier. L'exactitude factuelle est une condition nécessaire, mais non suffisante, pour une évaluation complète.",
+                "id": "60cd7e00-01c2-4724-8858-c96aa49b9324",
+                "points": 5,
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "type": "standard"
+            }
+        ],
+        "selected_criteria": null,
+        "start_time": "2025-03-05T12:43:45.792861",
+        "status": "running",
+        "test_mode": true,
+        "total_qcm": 5
+    },
+    "results": {
+        "advanced_metrics": {},
+        "criteria_scores": {
+            "Generic": {
+                "advanced_metrics": {},
+                "questions_count": 5,
+                "score": 25,
+                "success_count": 5,
+                "total": 25
+            }
+        },
+        "details": [
+            {
+                "advanced": {},
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de cas pratiques et d'exemples d'application réglementaire, au-delà de la simple illustration des définitions des critères (Biais, Intégrité, Pertinence)?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "advanced": {},
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "advanced": {},
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "advanced": {},
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "score": 5,
+                "status": "success"
+            },
+            {
+                "advanced": {},
+                "correct_answer": "B",
+                "criterion": "Generic",
+                "max_points": 5,
+                "model_answer": "B",
+                "question": "Dans le contexte de l'évaluation des LLM par QCM, quel est le principal avantage de l'utilisation de critères tels que le biais, l'intégrité et la pertinence, au-delà de la simple vérification de l'exactitude factuelle des réponses ?",
+                "score": 5,
+                "status": "success"
+            }
+        ],
+        "error_count": 0,
+        "success_rate": 100.0,
+        "total_score": 100.0
+    }
+}
